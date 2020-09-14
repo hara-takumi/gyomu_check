@@ -27,13 +27,11 @@ namespace GYOMU_CHECK
             var connection = new MySqlConnection(connectionString);
             try
             {
-
                 // データベースの接続開始
                 connection.Open();
             }
             catch
             {
-
                 MessageBox.Show("DBの接続に失敗しました。", "エラー");
                 return false;
             }
@@ -63,13 +61,11 @@ namespace GYOMU_CHECK
             }
             catch (Exception e)
             {
-
                 MessageBox.Show(e.ToString(), "エラー");
                 MessageBox.Show("テーブルの取得に失敗しました。", "エラー");
                 return false;
             }
         }
-
 
         /// <summary>
         /// 登録・削除可能か判定

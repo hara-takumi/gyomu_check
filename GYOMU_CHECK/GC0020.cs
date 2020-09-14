@@ -6,6 +6,7 @@ namespace GYOMU_CHECK
 {
     public partial class GC0020 : Form
     {
+        #region メンバー変数
         // APIを呼び出すため、対象のＤＬＬをインポート
         [DllImport("USER32.DLL")]
         private static extern IntPtr GetSystemMenu(IntPtr hWnd, UInt32 bRevert);
@@ -17,7 +18,14 @@ namespace GYOMU_CHECK
         private const UInt32 SC_CLOSE = 0x0000F060;
         private const UInt32 MF_BYCOMMAND = 0x00000000;
 
-        private User user;
+        private readonly User user;
+        #endregion
+
+        #region コンストラクタ
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="user"></param>
         public GC0020(User user)
         {
             this.user = user;
@@ -29,11 +37,9 @@ namespace GYOMU_CHECK
             // [×]ボタンを無効化する。
             RemoveMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
         }
+        #endregion
 
-        private void GC0020_Load(object sender, EventArgs e)
-        {
-        }
-
+        #region ボタンイベント
         /// <summary>
         /// 業務進捗ボタン処理
         /// </summary>
@@ -46,17 +52,26 @@ namespace GYOMU_CHECK
         }
 
         /// <summary>
+        /// マスターメンテナンス画面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnMaster_Click(object sender, EventArgs e)
+        {
+            MS0020 Ms0020 = new MS0020(user);
+            Ms0020.Show();
+        }
+
+        /// <summary>
         /// パスワード変更ボタン処理
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_Click(object sender, EventArgs e)
+        private void btnChangePw_Click(object sender, EventArgs e)
         {
             MS0010 Ms0010 = new MS0010(user);
             Ms0010.Show();
         }
-
-
 
         /// <summary>
         /// ログアウト
@@ -67,13 +82,8 @@ namespace GYOMU_CHECK
         {
             GC0010 frm = new GC0010();
             frm.Show();
-            this.Close();
+            Close();
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            MS0020 Ms0020 = new MS0020(user);
-            Ms0020.Show();
-        }
+        #endregion
     }
 }

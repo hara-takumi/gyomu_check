@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -9,16 +10,18 @@ namespace GYOMU_CHECK
 {
     public partial class GC0040 : Form
     {
-        CommonUtil comU = new CommonUtil();
-        private User user;
-        string sagyoYYMM;
-        string gyomuCd;
-        string gyomuNm;
+        private readonly CommonUtil comU = new CommonUtil();
+        private readonly User user;
+        private readonly string sagyoYYMM;
+        private readonly string gyomuCd;
+        private readonly string gyomuNm;
         bool changeFlg = true;
         bool errorFlg = false;
         MySqlTransaction transaction = null;
         MySqlCommand command = new MySqlCommand();
-        string programId = "GC0040";
+        private readonly string programId = "GC0040";
+
+
         public enum column
         {
             //CHECK,
@@ -47,12 +50,13 @@ namespace GYOMU_CHECK
 
         }
 
-        public GC0040(User user)
-        {
-            this.user = user;
-            InitializeComponent();
-        }
-
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="yyyyMM"></param>
+        /// <param name="Cd"></param>
+        /// <param name="Nm"></param>
         public GC0040(User user, string yyyyMM, string Cd, string Nm)
         {
             sagyoYYMM = comU.CReplace(yyyyMM);
@@ -81,27 +85,30 @@ namespace GYOMU_CHECK
             if (!comU.CGyomu(ref dataSet, false))
             {
                 errorFlg = true;
-                this.Close();
+                Close();
                 return;
             }
 
             lblGyomu.Text = gyomuNm;
             lblYear.Text = sagyoYYMM.Substring(0, 4) + "/" + sagyoYYMM.Substring(4, 2);
+            //排他登録
             TorokuHaita();
-            //グリッド表示
-            dgvDisply();
+            //一覧表示
+            DgvDisply();
         }
+
         /// <summary>
         /// 排他登録
         /// </summary>
         private void TorokuHaita()
         {
-
+            //データベースに接続できなかった場合
             if (!comU.CConnect(ref transaction, ref command))
             {
                 errorFlg = true;
                 return;
             }
+            //排他登録に失敗した場合
             if (!comU.InsertHaitaTrn(transaction, ref command, sagyoYYMM, gyomuCd, user.Id, programId))
             {
                 errorFlg = true;
@@ -111,9 +118,7 @@ namespace GYOMU_CHECK
             {
                 transaction.Commit();
             }
-
         }
-
 
         /// <summary>
         /// 各種ボタン押下
@@ -123,14 +128,10 @@ namespace GYOMU_CHECK
         private void dgvIchiran_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dgv = (DataGridView)sender;
-            if (e.RowIndex == -1)
-            {
-                return;
-            }
-            if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, e.RowIndex].Value)
-            {
-                return;
-            }
+            if (e.RowIndex < 0) return;
+
+            //if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, e.RowIndex].Value) return;
+
             String status = (String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, e.RowIndex].Value;
             String sagyoNm = (String)dgvIchiran[(int)column.MST_SAGYO_NAME, e.RowIndex].Value;
             //開始押下
@@ -285,12 +286,13 @@ namespace GYOMU_CHECK
         /// <param name="e"></param>
         private void btnReturn_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
+
         /// <summary>
         /// 明細表示
         /// </summary>
-        private void dgvDisply()
+        private void DgvDisply()
         {
             StringBuilder sql = new StringBuilder();
             sql.Append(" SELECT ");
@@ -298,23 +300,23 @@ namespace GYOMU_CHECK
             sql.Append("    ,MST_SAGYO.NAME");
             sql.Append("    ,MST_SAGYO.PARENT_FLG");
             sql.Append("    ,TRN_CHECK_B.SAGYO_STATUS");
-            sql.Append("    ,TRN_CHECK_B.SAGYO_STATUS");
+            sql.Append("    ,TRN_CHECK_B.SAGYO_STATUS AS SAGYO_STATUS_OLD");
             sql.Append("    ,CASE WHEN MST_SAGYO.PARENT_FLG = '1' THEN ''");
             sql.Append("    WHEN trn_check_B.SAGYO_STATUS = '0' THEN '未着手'");
             sql.Append("    WHEN trn_check_B.SAGYO_STATUS = '1' THEN '処理中'");
-            sql.Append("    ELSE '完了' END");
+            sql.Append("    ELSE '完了' END AS STATUS_NAME");
             sql.Append("    ,START_USER.MST_SHAIN_CODE");
-            sql.Append("    ,START_USER.MST_SHAIN_CODE");
-            sql.Append("    ,START_USER.MST_SHAIN_NAME");
+            sql.Append("    ,START_USER.MST_SHAIN_CODE AS START_EMPLOYEE_ID_OLD");
+            sql.Append("    ,START_USER.MST_SHAIN_NAME AS START_EMPLOYEE_NAME");
             sql.Append("    ,TRN_CHECK_B.SAGYO_START_DATE");
-            sql.Append("    ,TRN_CHECK_B.SAGYO_START_DATE");
+            sql.Append("    ,TRN_CHECK_B.SAGYO_START_DATE AS SAGYO_START_DATE_OLD");
             sql.Append("    ,END_USER.MST_SHAIN_CODE");
-            sql.Append("    ,END_USER.MST_SHAIN_CODE");
-            sql.Append("    ,END_USER.MST_SHAIN_NAME");
+            sql.Append("    ,END_USER.MST_SHAIN_CODE AS END_EMPLOYEE_ID_OLD");
+            sql.Append("    ,END_USER.MST_SHAIN_NAME AS END_EMPLOYEE_NAME");
             sql.Append("    ,TRN_CHECK_B.SAGYO_END_DATE");
-            sql.Append("    ,TRN_CHECK_B.SAGYO_END_DATE");
+            sql.Append("    ,TRN_CHECK_B.SAGYO_END_DATE AS SAGYO_END_DATE_OLD");
             sql.Append("    ,TRN_CHECK_B.BIKOU");
-            sql.Append("    ,TRN_CHECK_B.BIKOU");
+            sql.Append("    ,TRN_CHECK_B.BIKOU AS BIKOU_OLD");
             sql.Append(" FROM TRN_CHECK_B");
             sql.Append(" LEFT JOIN MST_SAGYO");
             sql.Append(" ON TRN_CHECK_B.SAGYO_CD = MST_SAGYO.CD");
@@ -329,144 +331,240 @@ namespace GYOMU_CHECK
             sql.Append(" ORDER BY MST_SAGYO.HYOJI_JUN");
 
             DataSet ds = new DataSet();
+            //検索結果が返ってこなかった場合
             if (!comU.CSerch(sql.ToString(), ref ds))
             {
-                this.Close();
+                Close();
                 return;
             }
-            if (ds.Tables["Table1"].Rows.Count == 0)
+            //取得したデータ件数が0件の場合
+            if (ds.Tables[0].Rows.Count == 0)
             {
                 MessageBox.Show("指定した業務の作業が登録されていません。\n\r作業マスタの登録を行ってください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
+                Close();
             }
-
-            dgvIchiran.DataSource = ds.Tables[0];
 
             //セルボタン作成
             DataGridViewDisableButtonColumn dgvBtnStrat = new DataGridViewDisableButtonColumn();
-            dgvBtnStrat.Text = "開始";
+            dgvBtnStrat.Name = "開始";
             dgvBtnStrat.UseColumnTextForButtonValue = true;
             dgvBtnStrat.Width = 60;
-            dgvIchiran.Columns.Insert((int)column.START_BUTTON, dgvBtnStrat);
 
             DataGridViewDisableButtonColumn dgvBtnEnd = new DataGridViewDisableButtonColumn();
-            dgvBtnEnd.Text = "終了";
+            dgvBtnEnd.Name = "終了";
             dgvBtnEnd.UseColumnTextForButtonValue = true;
             dgvBtnEnd.Width = 60;
-            dgvIchiran.Columns.Insert((int)column.END_BUTTON, dgvBtnEnd);
 
             DataGridViewDisableButtonColumn dgvBtnFix = new DataGridViewDisableButtonColumn();
-            dgvBtnFix.Text = "状況訂正";
+            dgvBtnFix.Name = "状況訂正";
             dgvBtnFix.UseColumnTextForButtonValue = true;
             dgvBtnFix.Width = 80;
-            dgvIchiran.Columns.Insert((int)column.COLLECT_BUTTON, dgvBtnFix);
 
             //変更確認チェックボックス作成
             DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
-            dgvIchiran.Columns.Insert((int)column.CHANGE_FLG, dgvcbc);
             dgvcbc.TrueValue = true;
             dgvcbc.FalseValue = false;
 
-            //作業名列固定
-            dgvIchiran.RowTemplate.Height = 70;
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Frozen = true;
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Width = 400;
-            dgvIchiran.Columns[(int)column.STATUS_NAME].Width = 60;
-            dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].Width = 80;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].Width = 113;
-            dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].Width = 80;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].Width = 113;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU].Width = 100;
-
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].HeaderText = "";
-            dgvIchiran.Columns[(int)column.STATUS_NAME].HeaderText = "状況";
-            dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].HeaderText = "作業開始者";
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].HeaderText = "開始日時";
-            dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].HeaderText = "作業終了者";
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].HeaderText = "終了日時";
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU].HeaderText = "備考";
-
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.STATUS_NAME].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].ReadOnly = true;
-
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_CD].Visible = false;
-            dgvIchiran.Columns[(int)column.MST_SAGYO_PARENT_FLG].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_STATUS].Visible = false;
-            dgvIchiran.Columns[(int)column.START_EMPLOYEE_ID].Visible = false;
-            dgvIchiran.Columns[(int)column.END_EMPLOYEE_ID].Visible = false;
-            dgvIchiran.Columns[(int)column.CHANGE_FLG].Visible = false;
-
-            dgvIchiran.Columns[(int)column.END_EMPLOYEE_ID_OLD].Visible = false;
-            dgvIchiran.Columns[(int)column.START_EMPLOYEE_ID_OLD].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU_OLD].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE_OLD].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE_OLD].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_STATUS_OLD].Visible = false;
-
-            dgvIchiran.Columns[(int)column.STATUS_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-
-            ((DataGridViewTextBoxColumn)dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU]).MaxInputLength = 100;
-
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].DefaultCellStyle.Format = "yyyy/MM/dd HH:mm";
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].DefaultCellStyle.Format = "yyyy/MM/dd HH:mm";
-
-
-            //実施要否チェック済み
-            for (int i = 0; i < dgvIchiran.RowCount; i++)
-            {
-                if (i % 2 == 1)
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, ds.Tables[0].Rows.Count).Select(index => ds.Tables[0].Rows[index] as DataRow).ToList()
+                .ForEach(dr => 
                 {
-                    dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightBlue;
-                }
-                DataGridViewDisableButtonCell startButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[i].Cells[(int)column.START_BUTTON];
-                DataGridViewDisableButtonCell endButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[i].Cells[(int)column.END_BUTTON];
-                DataGridViewDisableButtonCell collectButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[i].Cells[(int)column.COLLECT_BUTTON];
+                    dgvIchiran.Rows.Add();
+                    int indx = dgvIchiran.Rows.Count - 1;
+                    dgvIchiran.Rows[indx].Cells["SAGYO_NAME"].Value = dr["NAME"].ToString();
+                    dgvIchiran.Rows[indx].Cells["PARENT_FLG"].Value = dr["PARENT_FLG"].ToString();
+                    dgvIchiran.Rows[indx].Cells["START_BUTTON"].Value = dgvBtnStrat.Name;
+                    dgvIchiran.Rows[indx].Cells["END_BUTTON"].Value = dgvBtnEnd.Name;
+                    dgvIchiran.Rows[indx].Cells["COLLECT_BUTTON"].Value = dgvBtnFix.Name;
+                    dgvIchiran.Rows[indx].Cells["SAGYO_STATUS"].Value = dr["SAGYO_STATUS"].ToString();
+                    dgvIchiran.Rows[indx].Cells["SAGYO_STATUS_OLD"].Value = dr["SAGYO_STATUS_OLD"].ToString();
+                    dgvIchiran.Rows[indx].Cells["STATUS_NAME"].Value = dr["STATUS_NAME"].ToString();
+                    dgvIchiran.Rows[indx].Cells["START_EMPLOYEE_ID_OLD"].Value = dr["START_EMPLOYEE_ID_OLD"].ToString();
+                    dgvIchiran.Rows[indx].Cells["START_EMPLOYEE_NAME"].Value = dr["START_EMPLOYEE_NAME"].ToString();
+                    if (!dr["SAGYO_START_DATE"].ToString().Equals(""))
+                    {
+                        dgvIchiran.Rows[indx].Cells["SAGYO_START_DATE"].Value = Convert.ToDateTime(dr["SAGYO_START_DATE"].ToString()).ToString("yyyy/MM/dd HH:mm");
+                    }
+                    if (!dr["SAGYO_START_DATE_OLD"].ToString().Equals(""))
+                    {
+                        dgvIchiran.Rows[indx].Cells["SAGYO_START_DATE_OLD"].Value = Convert.ToDateTime(dr["SAGYO_START_DATE_OLD"].ToString()).ToString("yyyy/MM/dd HH:mm");
+                    }
+                    dgvIchiran.Rows[indx].Cells["END_EMPLOYEE_ID_OLD"].Value = dr["END_EMPLOYEE_ID_OLD"].ToString();
+                    dgvIchiran.Rows[indx].Cells["END_EMPLOYEE_NAME"].Value = dr["END_EMPLOYEE_NAME"].ToString();
+                    if (!dr["SAGYO_END_DATE"].ToString().Equals(""))
+                    {
+                        dgvIchiran.Rows[indx].Cells["SAGYO_END_DATE"].Value = Convert.ToDateTime(dr["SAGYO_END_DATE"].ToString()).ToString("yyyy/MM/dd HH:mm");
+                    }
+                    if (!dr["SAGYO_END_DATE_OLD"].ToString().Equals(""))
+                    {
+                        dgvIchiran.Rows[indx].Cells["SAGYO_END_DATE_OLD"].Value = Convert.ToDateTime(dr["SAGYO_END_DATE_OLD"].ToString()).ToString("yyyy/MM/dd HH:mm");
+                    }
+                    dgvIchiran.Rows[indx].Cells["BIKOU"].Value = dr["BIKOU"].ToString();
+                    dgvIchiran.Rows[indx].Cells["BIKOU_OLD"].Value = dr["BIKOU_OLD"].ToString();
 
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
-                {
-                    dgvIchiran[(int)column.START_BUTTON, i] = new DataGridViewTextBoxCell();
-                    dgvIchiran[(int)column.END_BUTTON, i] = new DataGridViewTextBoxCell();
-                    dgvIchiran[(int)column.COLLECT_BUTTON, i] = new DataGridViewTextBoxCell();
-                    dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightGreen;
-                    dgvIchiran.Rows[i].ReadOnly = true;
-                }
-                else if ((String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "0")
-                {
-                    endButtonCell.Enabled = false;
-                    collectButtonCell.Enabled = false;
-                    dgvIchiran[(int)column.CHANGE_FLG, i].Value = false;
+                    if (indx % 2 == 1)
+                    {
+                        dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightBlue;
+                    }
 
-                }
-                else if ((String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "1")
-                {
-                    startButtonCell.Enabled = false;
-                    dgvIchiran[(int)column.CHANGE_FLG, i].Value = false;
-                }
-                else if ((String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "2")
-                {
-                    startButtonCell.Enabled = false;
-                    endButtonCell.Enabled = false;
-                    dgvIchiran[(int)column.CHANGE_FLG, i].Value = false;
+                    DataGridViewDisableButtonCell startButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[indx].Cells["START_BUTTON"];
+                    DataGridViewDisableButtonCell endButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[indx].Cells["END_BUTTON"];
+                    DataGridViewDisableButtonCell collectButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[indx].Cells["COLLECT_BUTTON"];
 
-                }
-            }
-            //ソートの不可
-            foreach (DataGridViewColumn column in this.dgvIchiran.Columns)
-            {
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
-            dgvIchiran.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                    if ((bool)dr["PARENT_FLG"])
+                    {
+                        dgvIchiran.Rows[indx].Cells["START_BUTTON"] = new DataGridViewTextBoxCell();
+                        dgvIchiran.Rows[indx].Cells["END_BUTTON"] = new DataGridViewTextBoxCell();
+                        dgvIchiran.Rows[indx].Cells["COLLECT_BUTTON"] = new DataGridViewTextBoxCell();
+                        dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightGreen;
+                    }
+                    else if(dr["SAGYO_STATUS"].ToString() == "0")
+                    {
+                        endButtonCell.Enabled = false;
+                        collectButtonCell.Enabled = false;
+                        dgvIchiran.Rows[indx].Cells["CHANGE_FLG"].Value = false;
+                    }
+                    else if (dr["SAGYO_STATUS"].ToString() == "1")
+                    {
+                        startButtonCell.Enabled = false;
+                        dgvIchiran.Rows[indx].Cells["CHANGE_FLG"].Value = false;
+                    }
+                    else if (dr["SAGYO_STATUS"].ToString() == "2")
+                    {
+                        startButtonCell.Enabled = false;
+                        endButtonCell.Enabled = false;
+                        dgvIchiran.Rows[indx].Cells["CHANGE_FLG"].Value = false;
+                    }
+
+                    dgvIchiran.Rows[indx].Height = 30;
+                });
 
 
+            //dgvIchiran.DataSource = ds.Tables[0];
+
+            ////セルボタン作成
+            //DataGridViewDisableButtonColumn dgvBtnStrat = new DataGridViewDisableButtonColumn();
+            //dgvBtnStrat.Text = "開始";
+            //dgvBtnStrat.UseColumnTextForButtonValue = true;
+            //dgvBtnStrat.Width = 60;
+            //dgvIchiran.Columns.Insert((int)column.START_BUTTON, dgvBtnStrat);
+
+            //DataGridViewDisableButtonColumn dgvBtnEnd = new DataGridViewDisableButtonColumn();
+            //dgvBtnEnd.Text = "終了";
+            //dgvBtnEnd.UseColumnTextForButtonValue = true;
+            //dgvBtnEnd.Width = 60;
+            //dgvIchiran.Columns.Insert((int)column.END_BUTTON, dgvBtnEnd);
+
+            //DataGridViewDisableButtonColumn dgvBtnFix = new DataGridViewDisableButtonColumn();
+            //dgvBtnFix.Text = "状況訂正";
+            //dgvBtnFix.UseColumnTextForButtonValue = true;
+            //dgvBtnFix.Width = 80;
+            //dgvIchiran.Columns.Insert((int)column.COLLECT_BUTTON, dgvBtnFix);
+
+            ////変更確認チェックボックス作成
+            //DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
+            //dgvIchiran.Columns.Insert((int)column.CHANGE_FLG, dgvcbc);
+            //dgvcbc.TrueValue = true;
+            //dgvcbc.FalseValue = false;
+
+            ////作業名列固定
+            //dgvIchiran.RowTemplate.Height = 70;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Frozen = true;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Width = 400;
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].Width = 60;
+            //dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].Width = 80;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].Width = 113;
+            //dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].Width = 80;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].Width = 113;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU].Width = 100;
+
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].HeaderText = "";
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].HeaderText = "状況";
+            //dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].HeaderText = "作業開始者";
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].HeaderText = "開始日時";
+            //dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].HeaderText = "作業終了者";
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].HeaderText = "終了日時";
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU].HeaderText = "備考";
+
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].ReadOnly = true;
+
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_CD].Visible = false;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_PARENT_FLG].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_STATUS].Visible = false;
+            //dgvIchiran.Columns[(int)column.START_EMPLOYEE_ID].Visible = false;
+            //dgvIchiran.Columns[(int)column.END_EMPLOYEE_ID].Visible = false;
+            //dgvIchiran.Columns[(int)column.CHANGE_FLG].Visible = false;
+
+            //dgvIchiran.Columns[(int)column.END_EMPLOYEE_ID_OLD].Visible = false;
+            //dgvIchiran.Columns[(int)column.START_EMPLOYEE_ID_OLD].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU_OLD].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE_OLD].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE_OLD].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_STATUS_OLD].Visible = false;
+
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            //dgvIchiran.Columns[(int)column.START_EMPLOYEE_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            //dgvIchiran.Columns[(int)column.END_EMPLOYEE_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+
+            //((DataGridViewTextBoxColumn)dgvIchiran.Columns[(int)column.TRN_CHECK_B_BIKOU]).MaxInputLength = 100;
+
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_START_DATE].DefaultCellStyle.Format = "yyyy/MM/dd HH:mm";
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_END_DATE].DefaultCellStyle.Format = "yyyy/MM/dd HH:mm";
+
+
+            ////実施要否チェック済み
+            //for (int i = 0; i < dgvIchiran.RowCount; i++)
+            //{
+            //    if (i % 2 == 1)
+            //    {
+            //        dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightBlue;
+            //    }
+            //    DataGridViewDisableButtonCell startButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[i].Cells[(int)column.START_BUTTON];
+            //    DataGridViewDisableButtonCell endButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[i].Cells[(int)column.END_BUTTON];
+            //    DataGridViewDisableButtonCell collectButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[i].Cells[(int)column.COLLECT_BUTTON];
+
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        dgvIchiran[(int)column.START_BUTTON, i] = new DataGridViewTextBoxCell();
+            //        dgvIchiran[(int)column.END_BUTTON, i] = new DataGridViewTextBoxCell();
+            //        dgvIchiran[(int)column.COLLECT_BUTTON, i] = new DataGridViewTextBoxCell();
+            //        dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightGreen;
+            //        dgvIchiran.Rows[i].ReadOnly = true;
+            //    }
+            //    else if ((String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "0")
+            //    {
+            //        endButtonCell.Enabled = false;
+            //        collectButtonCell.Enabled = false;
+            //        dgvIchiran[(int)column.CHANGE_FLG, i].Value = false;
+
+            //    }
+            //    else if ((String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "1")
+            //    {
+            //        startButtonCell.Enabled = false;
+            //        dgvIchiran[(int)column.CHANGE_FLG, i].Value = false;
+            //    }
+            //    else if ((String)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "2")
+            //    {
+            //        startButtonCell.Enabled = false;
+            //        endButtonCell.Enabled = false;
+            //        dgvIchiran[(int)column.CHANGE_FLG, i].Value = false;
+
+            //    }
+            //}
+            ////ソートの不可
+            //foreach (DataGridViewColumn column in this.dgvIchiran.Columns)
+            //{
+            //    column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            //}
+            //dgvIchiran.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         }
 
         /// <summary>
@@ -476,11 +574,14 @@ namespace GYOMU_CHECK
         /// <param name="e"></param>
         private void btnInsert_Click(object sender, EventArgs e)
         {
-            Update();
+            UpdateGyomu();
         }
-        private void Update()
-        {
 
+        /// <summary>
+        /// 業務更新
+        /// </summary>
+        private void UpdateGyomu()
+        {
             DialogResult result = MessageBox.Show("更新を行います。よろしいでしょうか。？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 
             //何が選択されたか調べる
@@ -488,24 +589,23 @@ namespace GYOMU_CHECK
             {
                 //明細の更新行をチェックする
                 CheckMeisaiChange();
+                //更新を行うか判定
                 if (!CheckUpdate())
                 {
                     MessageBox.Show("明細が変更されていません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (!comU.CConnect(ref transaction, ref command))
-                {
-                    return;
-                }
+                //データベースに接続できない場合
+                if (!comU.CConnect(ref transaction, ref command)) return;
 
+                //業務チェックヘッダの更新に失敗した場合
                 if (!UpdateGyomuCheckHeader(transaction))
                 {
-
                     MessageBox.Show("業務チェックヘッダの更新に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-
+                //業務チェック明細の更新に失敗した場合
                 if (!UpdateGyomuCheckBody(transaction))
                 {
                     MessageBox.Show("業務チェック明細の更新に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -513,58 +613,108 @@ namespace GYOMU_CHECK
                 }
                 transaction.Commit();
                 MessageBox.Show("更新が完了しました。", "");
+
+                //排他削除
                 DeleteHaita();
                 changeFlg = false;
-                this.Close();
+                Close();
             }
         }
+
         /// <summary>
         /// 業務チェックヘッダー更新
         /// </summary>
         private bool UpdateGyomuCheckHeader(MySqlTransaction transaction)
         {
             //すべて2の場合、完了、すべて0の場合、未着手
-            string sagyoState = "";
+            string sagyoState = "0";
             bool firstFlg = false;
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                //親項目の場合スキップ
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx])
+                .Where(row => row.Cells["PARENT_FLG"].Value.ToString().Equals("False")).ToList()
+                .ForEach(row =>
                 {
-                    continue;
-                }
-                //最初の行のステータスを保持
-                else if(!firstFlg)
-                {
-                    sagyoState = dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value.ToString();
-                    firstFlg = true;
-                }
-                //ステータスが一致しない場合処理中
-                else if(sagyoState != dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value.ToString())
-                {
-                    sagyoState = "1";
-                }
-                //ステータスが処理中の場合処理終了
-                if(sagyoState == "1")
-                {
-                    break;
-                }
-            }
+                    if (sagyoState.Equals("0"))
+                    {
+                        //最初の行のステータスを保持
+                        if (!firstFlg)
+                        {
+                            sagyoState = row.Cells["SAGYO_STATUS"].Value.ToString();
+                            firstFlg = true;
+                        }
+                        //ステータスが一致しない場合処理中
+                        if (sagyoState != row.Cells["SAGYO_STATUS"].Value.ToString())
+                        {
+                            sagyoState = "1";
+                        }
+                    }
+                });
+
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    //親項目の場合スキップ
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    //最初の行のステータスを保持
+            //    else if(!firstFlg)
+            //    {
+            //        sagyoState = dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value.ToString();
+            //        firstFlg = true;
+            //    }
+            //    //ステータスが一致しない場合処理中
+            //    else if(sagyoState != dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value.ToString())
+            //    {
+            //        sagyoState = "1";
+            //    }
+            //    //ステータスが処理中の場合処理終了
+            //    if(sagyoState == "1")
+            //    {
+            //        break;
+            //    }
+            //}
             DateTime lastDate = DateTime.Now;
             string lastUser = user.Id;
             //ステータスが処理中の場合、
             if ("1".Equals(sagyoState))
             {
                 lastDate = DateTime.MinValue;
-                GetLastDate(ref lastUser, ref lastDate);
+                Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx])
+                .Where(row => row.Cells["PARENT_FLG"].Value.ToString().Equals("False")).ToList()
+                .ForEach(row =>
+                {
+                    //作業終了日が空白以外の場合
+                    if (!string.IsNullOrEmpty(row.Cells["SAGYO_END_DATE"].Value.ToString()))
+                    {
+                        //現在日より作業終了日が前の場合
+                        if (DateTime.Parse(row.Cells["SAGYO_END_DATE"].Value.ToString()) > lastDate)
+                        {
+                            lastDate = DateTime.Parse(row.Cells["SAGYO_END_DATE"].Value.ToString());
+                            lastUser = row.Cells["END_EMPLOYEE_ID"].Value.ToString();
+                        }
+                    }
+                    //作業開始日が空白以外の場合
+                    else if (!string.IsNullOrEmpty(row.Cells["SAGYO_START_DATE"].Value.ToString()))
+                    {
+                        //現在日より作業開始日が前の場合
+                        if (DateTime.Parse(row.Cells["SAGYO_START_DATE"].Value.ToString()) > lastDate)
+                        {
+                            lastDate = DateTime.Parse(row.Cells["SAGYO_START_DATE"].Value.ToString());
+                            lastUser = row.Cells["START_EMPLOYEE_ID"].Value.ToString();
+                        }
+                    }
+                });
+                //GetLastDate(ref lastUser, ref lastDate);
             }
 
             StringBuilder sql = new StringBuilder();
             sql.Append(" UPDATE TRN_CHECK_H ");
             sql.Append($"    SET  SAGYO_STATUS = {sagyoState}");
+            //ステータスが未着手の場合
             if ("0".Equals(sagyoState))
             {
-
                 sql.Append("    ,    SAGYO_LAST_USER = null  ");
                 sql.Append("    ,    SAGYO_LAST_DATE = null ");
             }
@@ -585,112 +735,194 @@ namespace GYOMU_CHECK
             }
             return true;
         }
+
         /// <summary>
         /// 最終作業者と最終作業日を取得
         /// </summary>
-        private void GetLastDate(ref string lastUser,ref DateTime lastDate)
-        {
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                //親項目の場合スキップ
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
-                {
-                    continue;
-                }
-                if (!string.IsNullOrEmpty((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString()))
-                {
-                    if (DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString()) > lastDate)
-                    {
-                        lastDate = DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString());
-                        lastUser = (string)dgvIchiran[(int)column.END_EMPLOYEE_ID, i].Value.ToString();
-                    }
-                }
-                else if (!string.IsNullOrEmpty((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()))
-                {
-                    if(DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()) > lastDate)
-                    {
-                        lastDate = DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString());
-                        lastUser = (string)dgvIchiran[(int)column.START_EMPLOYEE_ID, i].Value.ToString();
-                    }
-                }
-            }
-        }
+        //private void GetLastDate(ref string lastUser,ref DateTime lastDate)
+        //{
+        //    Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx])
+        //        .Where(row => row.Cells["PARENT_FLG"].Value.ToString().Equals("False")).ToList()
+        //        .ForEach(row =>
+        //        {
+        //            if (!string.IsNullOrEmpty(row.Cells["SAGYO_END_DATE"].Value.ToString()))
+        //            {
+        //                if (DateTime.Parse(row.Cells["SAGYO_END_DATE"].Value.ToString()) > lastDate)
+        //                {
+        //                    lastDate = DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString());
+        //                    lastUser = (string)dgvIchiran[(int)column.END_EMPLOYEE_ID, i].Value.ToString();
+        //                }
+        //            }
+        //            else if (!string.IsNullOrEmpty((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()))
+        //            {
+        //                if (DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()) > lastDate)
+        //                {
+        //                    lastDate = DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString());
+        //                    lastUser = (string)dgvIchiran[(int)column.START_EMPLOYEE_ID, i].Value.ToString();
+        //                }
+        //            }
+        //        });
+
+
+
+        //    for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+        //    {
+        //        //親項目の場合スキップ
+        //        if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+        //        {
+        //            continue;
+        //        }
+        //        if (!string.IsNullOrEmpty((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString()))
+        //        {
+        //            if (DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString()) > lastDate)
+        //            {
+        //                lastDate = DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString());
+        //                lastUser = (string)dgvIchiran[(int)column.END_EMPLOYEE_ID, i].Value.ToString();
+        //            }
+        //        }
+        //        else if (!string.IsNullOrEmpty((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()))
+        //        {
+        //            if (DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()) > lastDate)
+        //            {
+        //                lastDate = DateTime.Parse(dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString());
+        //                lastUser = (string)dgvIchiran[(int)column.START_EMPLOYEE_ID, i].Value.ToString();
+        //            }
+        //        }
+        //    }
+        //}
+
         /// <summary>
         /// 値の変更が行われている場合、行ごとにチェックをする
         /// </summary>
         private void CheckMeisaiChange()
         {
-
             bool updateFlg;
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                updateFlg = true;
-                //親項目の場合スキップ
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
-                {
-                    continue;
-                }
-                //備考の確認
-                if (!((string)dgvIchiran[(int)column.TRN_CHECK_B_BIKOU, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_BIKOU_OLD, i].Value.ToString()))
-                {
-                    dgvIchiran[(int)column.CHANGE_FLG, i].Value = true;
-                    continue;
-                }
-                //作業ステータスの確認
-                if (!((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS_OLD, i].Value.ToString()))
-                {
-                    dgvIchiran[(int)column.CHANGE_FLG, i].Value = true;
-                    continue;
-                }
-                switch (dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value)
-                {
 
-                    //未着手の場合
-                    case "0":
-                        updateFlg = false;
-                        break;
-                    //処理中の場合
-                    case "1":
-                        if (((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE_OLD, i].Value.ToString())
-                            && ((string)dgvIchiran[(int)column.START_EMPLOYEE_ID, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.START_EMPLOYEE_ID_OLD, i].Value.ToString()))
-                        {
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx])
+                .Where(row => row.Cells["PARENT_FLG"].Value.ToString().Equals("False")).ToList()
+                .ForEach(row => 
+                {
+                    updateFlg = true;
+                    //備考の確認
+                    if (!row.Cells["BIKOU"].Value.ToString().Equals(row.Cells["BIKOU_OLD"].Value.ToString()))
+                    {
+                        row.Cells["CHANGE_FLG"].Value = true;
+                        return;
+                    }
+                    //作業ステータスの確認
+                    if (!row.Cells["SAGYO_STATUS"].Value.ToString().Equals(row.Cells["SAGYO_STATUS_OLD"].Value.ToString()))
+                    {
+                        row.Cells["CHANGE_FLG"].Value = true;
+                        return;
+                    }
+                    switch (row.Cells["SAGYO_STATUS"].Value)
+                    {
+                        //未着手の場合
+                        case "0":
                             updateFlg = false;
-                        }
-                        break;
-                    //完了の場合
-                    case "2":
-                        if (((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE_OLD, i].Value.ToString())
-                            && ((string)dgvIchiran[(int)column.END_EMPLOYEE_ID, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.END_EMPLOYEE_ID_OLD, i].Value.ToString()))
-                        {
-                            updateFlg = false;
-                        }
-                        break;
+                            break;
+                        //処理中の場合
+                        case "1":
+                            if (row.Cells["SAGYO_START_DATE"].Value.ToString().Equals(row.Cells["SAGYO_START_DATE_OLD"].Value.ToString())
+                                && row.Cells["START_EMPLOYEE_ID"].Value.ToString().Equals(row.Cells["START_EMPLOYEE_ID_OLD"].Value.ToString()))
+                            {
+                                updateFlg = false;
+                            }
+                            break;
+                        //完了の場合
+                        case "2":
+                            if (row.Cells["SAGYO_END_DATE"].Value.ToString().Equals(row.Cells["SAGYO_END_DATE_OLD"].Value.ToString())
+                                && row.Cells["END_EMPLOYEE_ID"].Value.ToString().Equals(row.Cells["END_EMPLOYEE_ID_OLD"].Value.ToString()))
+                            {
+                                updateFlg = false;
+                            }
+                            break;
+                    }
+                    row.Cells["CHANGE_FLG"].Value = updateFlg;
+                });
 
-                }
-                dgvIchiran[(int)column.CHANGE_FLG, i].Value = updateFlg;
-            }
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    updateFlg = true;
+            //    //親項目の場合スキップ
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    //備考の確認
+            //    if (!((string)dgvIchiran[(int)column.TRN_CHECK_B_BIKOU, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_BIKOU_OLD, i].Value.ToString()))
+            //    {
+            //        dgvIchiran[(int)column.CHANGE_FLG, i].Value = true;
+            //        continue;
+            //    }
+            //    //作業ステータスの確認
+            //    if (!((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS_OLD, i].Value.ToString()))
+            //    {
+            //        dgvIchiran[(int)column.CHANGE_FLG, i].Value = true;
+            //        continue;
+            //    }
+            //    switch (dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value)
+            //    {
+            //        //未着手の場合
+            //        case "0":
+            //            updateFlg = false;
+            //            break;
+            //        //処理中の場合
+            //        case "1":
+            //            if (((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_START_DATE_OLD, i].Value.ToString())
+            //                && ((string)dgvIchiran[(int)column.START_EMPLOYEE_ID, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.START_EMPLOYEE_ID_OLD, i].Value.ToString()))
+            //            {
+            //                updateFlg = false;
+            //            }
+            //            break;
+            //        //完了の場合
+            //        case "2":
+            //            if (((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_END_DATE_OLD, i].Value.ToString())
+            //                && ((string)dgvIchiran[(int)column.END_EMPLOYEE_ID, i].Value.ToString()).Equals((string)dgvIchiran[(int)column.END_EMPLOYEE_ID_OLD, i].Value.ToString()))
+            //            {
+            //                updateFlg = false;
+            //            }
+            //            break;
+            //    }
+            //    dgvIchiran[(int)column.CHANGE_FLG, i].Value = updateFlg;
+            //}
         }
+
         /// <summary>
         /// テーブルの更新を行うか判定する
         /// </summary>
         private bool CheckUpdate()
         {
-
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                //親項目の場合スキップ
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            changeFlg = false;
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx])
+                .Where(row => row.Cells["PARENT_FLG"].Value.ToString().Equals("False")).ToList()
+                .ForEach(row =>
                 {
-                    continue;
-                }
-                if ((bool)dgvIchiran[(int)column.CHANGE_FLG, i].Value)
-                {
-                    return true;
-                }
-            }
+                    if ((bool)row.Cells["CHANGE_FLG"].Value)
+                    {
+                        changeFlg = true;
+                    }
+                });
+            return changeFlg;
 
-            return false;
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    //親項目の場合スキップ
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    if ((bool)dgvIchiran[(int)column.CHANGE_FLG, i].Value)
+            //    {
+            //        return true;
+            //    }
+            //}
+
+            //return false;
         }
+
         /// <summary>
         /// 業務チェック明細の更新
         /// </summary>
