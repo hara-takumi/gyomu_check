@@ -71,7 +71,7 @@ namespace GYOMU_CHECK
             sql.Append(" SELECT  ");
             sql.Append($"     {user.Id} ");
             sql.Append("    ,MAX(MST_SHAINPW_GENERAITON) + 1 ");
-            sql.Append($"    ,{comU.GetHashedPassword(txtNewPass.Text)})");
+            sql.Append($"    ,{comU.CAddQuotation(comU.GetHashedPassword(txtNewPass.Text))}");
             sql.Append("    ,now() ");
             sql.Append($"    ,{user.Id} ");
             sql.Append($"    ,{comU.CAddQuotation(programId)} ");

@@ -35,7 +35,7 @@ namespace GYOMU_CHECK
         private void MS0020_Load(object sender, EventArgs e)
         {
             //コンボボックス設定(年月)
-            cmbYearFrom.DataSource = comU.CYear(false).ToArray();
+            cmbYearFrom.DataSource = comU.CYear(true).ToArray();
             cmbYearFrom.Text = dt.ToString("yyyy");
 
             dgvCalender1.AllowUserToAddRows = false;
@@ -121,7 +121,7 @@ namespace GYOMU_CHECK
                         if (dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor == Color.LightGray)
                         {
                             cell.ReadOnly = true;
-
+                            
                         }
                         else
                         {
@@ -191,97 +191,71 @@ namespace GYOMU_CHECK
             string old;
             for (int m = 1; m < 13; m++)
             {
-                if (Convert.ToInt32(tabControl1.SelectedIndex) + 1 == m)
+                Control[] cs = this.Controls.Find("dgvCalender" + m.ToString(), true);
+
+                DataGridView dgv = (DataGridView)cs[0];
+
+                string currentDay = dgv[e.ColumnIndex, e.RowIndex - 1].Value.ToString();
+                string tab = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                string currentDate = year + tab + String.Format("{0:D2}", Convert.ToInt32(currentDay));
+                old = currentDate;
+                if (dgv[e.ColumnIndex, e.RowIndex].Value != null)
                 {
-                    Control[] cs = this.Controls.Find("dgvCalender" + m.ToString(), true);
-
-                    DataGridView dgv = (DataGridView)cs[0];
-
-                    string currentDay = dgv[e.ColumnIndex, e.RowIndex - 1].Value.ToString();
-                    string tab = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                    string currentDate = year + tab + String.Format("{0:D2}", Convert.ToInt32(currentDay));
-                    old = currentDate;
-                    if (dgv[e.ColumnIndex, e.RowIndex].Value != null)
+                    string currentCellName = dgv[e.ColumnIndex, e.RowIndex].Value.ToString();
+                    if (dgv[e.ColumnIndex, e.RowIndex].ReadOnly == false)
                     {
-                        string currentCellName = dgv[e.ColumnIndex, e.RowIndex].Value.ToString();
-                        if (dgv[e.ColumnIndex, e.RowIndex].ReadOnly == false)
+                        if (torokuList.Count != 0)
                         {
-                            if (torokuList.Count != 0)
+                            foreach (Holiday listHoliday in torokuList)
                             {
-                                foreach (Holiday listHoliday in torokuList)
+                                if (old.Equals(listHoliday.Date))
                                 {
-                                    if (old.Equals(listHoliday.Date))
-                                    {
-                                        if (listHoliday.status.Equals("2"))
-                                        {
-                                            Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, "0");
-                                            torokuList.Add(holiday);
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, "1");
-                                            torokuList.Add(holiday);
-                                            break;
-                                        }
-
-                                    }
-                                    else
-                                    {
-                                        Holiday holiday = new Holiday(currentCellName, currentDate, "2", "1");
-                                        torokuList.Add(holiday);
-                                        break;
-                                    }
+                                    Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, "1");
+                                    torokuList.Add(holiday);
+                                    break;
                                 }
                             }
-                            else
+                        }
+                        else
+                        {
+                            Holiday holiday = new Holiday(currentCellName, currentDate, "2", "1");
+                            torokuList.Add(holiday);
+                        }
+
+                        changeFlg = true;
+                    }
+                }
+                else
+                {
+                    if (dgv[e.ColumnIndex, e.RowIndex].ReadOnly == false)
+                    {
+                        if (torokuList.Count != 0)
+                        {
+                            foreach (Holiday listHoliday in torokuList)
                             {
-                                Holiday holiday = new Holiday(currentCellName, currentDate, "2", "1");
+                                if (old.Equals(listHoliday.Date))
+                                {
+                                    Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, "1");
+                                    torokuList.Add(holiday);
+                                }
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if(dgv[e.ColumnIndex, e.RowIndex].Value == null)
+                            {
+                                Holiday holiday = new Holiday("", currentDate, "2", "1");
                                 torokuList.Add(holiday);
                             }
-
-                            changeFlg = true;
-                        }
-                    }
-                    else
-                    {
-                        if (dgv[e.ColumnIndex, e.RowIndex].ReadOnly == false)
-                        {
-                            if (torokuList.Count != 0)
-                            {
-                                foreach (Holiday listHoliday in torokuList)
-                                {
-                                    if (old.Equals(listHoliday.Date))
-                                    {
-                                        Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, "1");
-                                        torokuList.Add(holiday);
-                                        break;
-                                    }
-
-                                    else
-                                    {
-                                        Holiday holiday = new Holiday("", currentDate, "2", "1");
-                                        torokuList.Add(holiday);
-                                        break;
-                                    }
-                                }
-                            }
                             else
                             {
-                                if (dgv[e.ColumnIndex, e.RowIndex].Value == null)
-                                {
-                                    Holiday holiday = new Holiday("", currentDate, "2", "1");
-                                    torokuList.Add(holiday);
-                                }
-                                else
-                                {
-                                    Holiday holiday = new Holiday("", currentDate, "2", "0");
-                                    torokuList.Add(holiday);
-                                }
+                                Holiday holiday = new Holiday("", currentDate, "2", "0");
+                                torokuList.Add(holiday);
                             }
-
-                            changeFlg = true;
                         }
+
+                        changeFlg = true;
                     }
                 }
             }
@@ -416,10 +390,10 @@ namespace GYOMU_CHECK
         /// <param name="e"></param>
         private void btnInsert_Click(object sender, EventArgs e)
         {
-            if (torokuList.Count == 0)
+            if(torokuList.Count == 0)
             {
                 MessageBox.Show("更新対象がありませんでした", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+                
             }
             else
             {
@@ -445,7 +419,7 @@ namespace GYOMU_CHECK
         {
             Holiday[] dateHoliday = GetHoliday(Convert.ToString(year));
 
-            for (int m = 1; m < 13; m++)
+            for(int m = 1; m < 13; m++)
             {
                 //年月の設定
                 DateTime ymd = new DateTime(year, m, 1);
@@ -559,15 +533,7 @@ namespace GYOMU_CHECK
                             break;
                         //土曜
                         case 6:
-                            if (dgv.Rows[rowCount + 1].Cells[cellCount].Value == null)
-                            {
-                                dgv.Rows[rowCount].Cells[cellCount].Style.ForeColor = Color.Blue;
-                            }
-                            else
-                            {
-                                dgv.Rows[rowCount].Cells[cellCount].Style.ForeColor = Color.Red;
-                            }
-
+                            dgv.Rows[rowCount].Cells[cellCount].Style.ForeColor = Color.Blue;
                             //土曜の場合、次のrowへ
                             cellCount = 0;
                             rowCount = rowCount + 2;

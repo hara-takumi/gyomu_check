@@ -15,8 +15,8 @@ namespace GYOMU_CHECK
             InitializeComponent();
 
             txtPw.PasswordChar = '●';
-            txtUserCd.Text = "1805";
-            txtPw.Text = "2222222222";
+            txtUserCd.Text = "1111";
+            txtPw.Text = "6666666666";
         }
 
         /// <summary>
