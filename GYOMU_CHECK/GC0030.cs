@@ -250,6 +250,7 @@ namespace GYOMU_CHECK
                         dgvIchiran.Rows[indx].Cells["SAGYO_LAST_DATE"].Value = Convert.ToDateTime(dr["SAGYO_LAST_DATE"].ToString()).ToString("yyyy/MM/dd");
                     }
                     dgvIchiran.Rows[indx].Cells["SAGYO_LAST_USER"].Value = dr["MST_SHAIN_NAME"].ToString();
+                    //背景色を青色に変更
                     if(indx % 2 == 1)
                     {
                         dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightBlue;

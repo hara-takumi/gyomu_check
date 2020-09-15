@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label3 = new System.Windows.Forms.Label();
             this.cmbMonth = new System.Windows.Forms.ComboBox();
             this.cmbYear = new System.Windows.Forms.ComboBox();
@@ -47,6 +48,15 @@
             this.lblYear = new System.Windows.Forms.Label();
             this.lblGyomu = new System.Windows.Forms.Label();
             this.pnlIns = new System.Windows.Forms.Panel();
+            this.SAGYO_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PARENT_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.DISUSE_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.DISUSE_FLG_OLD = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.SAGYO_STATUS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.STATUS_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_USER = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_DATE = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvIchiran)).BeginInit();
             this.pnlUpd.SuspendLayout();
             this.pnlIns.SuspendLayout();
@@ -91,15 +101,25 @@
             // 
             this.dgvIchiran.AllowUserToAddRows = false;
             this.dgvIchiran.AllowUserToResizeRows = false;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvIchiran.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvIchiran.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgvIchiran.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvIchiran.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.SAGYO_CD,
+            this.SAGYO_NAME,
+            this.PARENT_FLG,
+            this.DISUSE_FLG,
+            this.DISUSE_FLG_OLD,
+            this.SAGYO_STATUS,
+            this.STATUS_NAME,
+            this.SAGYO_USER,
+            this.SAGYO_DATE});
             this.dgvIchiran.Location = new System.Drawing.Point(35, 168);
             this.dgvIchiran.Name = "dgvIchiran";
             this.dgvIchiran.RowHeadersVisible = false;
@@ -253,6 +273,79 @@
             this.pnlIns.Size = new System.Drawing.Size(232, 76);
             this.pnlIns.TabIndex = 107;
             // 
+            // SAGYO_CD
+            // 
+            this.SAGYO_CD.DataPropertyName = "SAGYO_CD";
+            this.SAGYO_CD.HeaderText = "MST_SAGYO_CD";
+            this.SAGYO_CD.Name = "SAGYO_CD";
+            this.SAGYO_CD.Visible = false;
+            // 
+            // SAGYO_NAME
+            // 
+            this.SAGYO_NAME.DataPropertyName = "SAGYO_NAME";
+            this.SAGYO_NAME.HeaderText = "";
+            this.SAGYO_NAME.Name = "SAGYO_NAME";
+            this.SAGYO_NAME.ReadOnly = true;
+            this.SAGYO_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.SAGYO_NAME.Width = 400;
+            // 
+            // PARENT_FLG
+            // 
+            this.PARENT_FLG.DataPropertyName = "PARENT_FLG";
+            this.PARENT_FLG.FalseValue = "false";
+            this.PARENT_FLG.HeaderText = "PARENT_FLG";
+            this.PARENT_FLG.Name = "PARENT_FLG";
+            this.PARENT_FLG.TrueValue = "true";
+            this.PARENT_FLG.Visible = false;
+            // 
+            // DISUSE_FLG
+            // 
+            this.DISUSE_FLG.DataPropertyName = "DISUSE_FLG";
+            this.DISUSE_FLG.FalseValue = "false";
+            this.DISUSE_FLG.HeaderText = "実施要否";
+            this.DISUSE_FLG.Name = "DISUSE_FLG";
+            this.DISUSE_FLG.TrueValue = "true";
+            // 
+            // DISUSE_FLG_OLD
+            // 
+            this.DISUSE_FLG_OLD.DataPropertyName = "DISUSE_FLG_OLD";
+            this.DISUSE_FLG_OLD.FalseValue = "false";
+            this.DISUSE_FLG_OLD.HeaderText = "DISUSE_FLG_OLD";
+            this.DISUSE_FLG_OLD.Name = "DISUSE_FLG_OLD";
+            this.DISUSE_FLG_OLD.TrueValue = "true";
+            this.DISUSE_FLG_OLD.Visible = false;
+            // 
+            // SAGYO_STATUS
+            // 
+            this.SAGYO_STATUS.DataPropertyName = "SAGYO_STATUS";
+            this.SAGYO_STATUS.HeaderText = "SAGYO_STATUS";
+            this.SAGYO_STATUS.Name = "SAGYO_STATUS";
+            this.SAGYO_STATUS.Visible = false;
+            // 
+            // STATUS_NAME
+            // 
+            this.STATUS_NAME.DataPropertyName = "STATUS_NAME";
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.STATUS_NAME.DefaultCellStyle = dataGridViewCellStyle2;
+            this.STATUS_NAME.HeaderText = "状況";
+            this.STATUS_NAME.Name = "STATUS_NAME";
+            this.STATUS_NAME.ReadOnly = true;
+            this.STATUS_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // SAGYO_USER
+            // 
+            this.SAGYO_USER.DataPropertyName = "SAGYO_USER";
+            this.SAGYO_USER.HeaderText = "SAGYO_USER";
+            this.SAGYO_USER.Name = "SAGYO_USER";
+            this.SAGYO_USER.Visible = false;
+            // 
+            // SAGYO_DATE
+            // 
+            this.SAGYO_DATE.DataPropertyName = "SAGYO_DATE";
+            this.SAGYO_DATE.HeaderText = "SAGYO_DATE";
+            this.SAGYO_DATE.Name = "SAGYO_DATE";
+            this.SAGYO_DATE.Visible = false;
+            // 
             // GC0050
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -305,5 +398,14 @@
         private System.Windows.Forms.Label lblYear;
         private System.Windows.Forms.Label lblGyomu;
         private System.Windows.Forms.Panel pnlIns;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_CD;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_NAME;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn PARENT_FLG;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn DISUSE_FLG;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn DISUSE_FLG_OLD;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_STATUS;
+        private System.Windows.Forms.DataGridViewTextBoxColumn STATUS_NAME;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_USER;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_DATE;
     }
 }

@@ -38,9 +38,21 @@
             this.btnReturn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.dgvIchiran = new System.Windows.Forms.DataGridView();
+            this.pnlHeader = new System.Windows.Forms.Panel();
+            this.lblYear = new System.Windows.Forms.Label();
+            this.lblGyomu = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.lblUserNm = new System.Windows.Forms.Label();
+            this.dataGridViewDisableButtonColumn1 = new GYOMU_CHECK.DataGridViewDisableButtonColumn();
+            this.dataGridViewDisableButtonColumn2 = new GYOMU_CHECK.DataGridViewDisableButtonColumn();
+            this.dataGridViewDisableButtonColumn3 = new GYOMU_CHECK.DataGridViewDisableButtonColumn();
+            this.dataGridViewButtonColumn1 = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.dataGridViewButtonColumn2 = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.dataGridViewButtonColumn3 = new System.Windows.Forms.DataGridViewButtonColumn();
             this.SAGYO_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SAGYO_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.PARENT_FLG = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PARENT_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.START_BUTTON = new GYOMU_CHECK.DataGridViewDisableButtonColumn();
             this.END_BUTTON = new GYOMU_CHECK.DataGridViewDisableButtonColumn();
             this.COLLECT_BUTTON = new GYOMU_CHECK.DataGridViewDisableButtonColumn();
@@ -60,15 +72,6 @@
             this.BIKOU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.BIKOU_OLD = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CHANGE_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.pnlHeader = new System.Windows.Forms.Panel();
-            this.lblYear = new System.Windows.Forms.Label();
-            this.lblGyomu = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.lblUserNm = new System.Windows.Forms.Label();
-            this.dataGridViewButtonColumn1 = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.dataGridViewButtonColumn2 = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.dataGridViewButtonColumn3 = new System.Windows.Forms.DataGridViewButtonColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvIchiran)).BeginInit();
             this.pnlHeader.SuspendLayout();
             this.SuspendLayout();
@@ -150,6 +153,114 @@
             this.dgvIchiran.TabIndex = 9;
             this.dgvIchiran.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvIchiran_CellContentClick);
             // 
+            // pnlHeader
+            // 
+            this.pnlHeader.Controls.Add(this.lblYear);
+            this.pnlHeader.Controls.Add(this.lblGyomu);
+            this.pnlHeader.Controls.Add(this.label8);
+            this.pnlHeader.Controls.Add(this.label10);
+            this.pnlHeader.Location = new System.Drawing.Point(26, 32);
+            this.pnlHeader.Name = "pnlHeader";
+            this.pnlHeader.Size = new System.Drawing.Size(747, 66);
+            this.pnlHeader.TabIndex = 26;
+            // 
+            // lblYear
+            // 
+            this.lblYear.AutoSize = true;
+            this.lblYear.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblYear.Location = new System.Drawing.Point(61, 6);
+            this.lblYear.Name = "lblYear";
+            this.lblYear.Size = new System.Drawing.Size(42, 16);
+            this.lblYear.TabIndex = 107;
+            this.lblYear.Text = "年月";
+            // 
+            // lblGyomu
+            // 
+            this.lblGyomu.AutoSize = true;
+            this.lblGyomu.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblGyomu.Location = new System.Drawing.Point(61, 41);
+            this.lblGyomu.Name = "lblGyomu";
+            this.lblGyomu.Size = new System.Drawing.Size(59, 16);
+            this.lblGyomu.TabIndex = 9;
+            this.lblGyomu.Text = "業務名";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label8.Location = new System.Drawing.Point(5, 41);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(40, 16);
+            this.label8.TabIndex = 7;
+            this.label8.Text = "業務";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label10.Location = new System.Drawing.Point(5, 6);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(40, 16);
+            this.label10.TabIndex = 3;
+            this.label10.Text = "年月";
+            // 
+            // lblUserNm
+            // 
+            this.lblUserNm.Font = new System.Drawing.Font("MS UI Gothic", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblUserNm.Location = new System.Drawing.Point(662, 11);
+            this.lblUserNm.Name = "lblUserNm";
+            this.lblUserNm.Size = new System.Drawing.Size(530, 18);
+            this.lblUserNm.TabIndex = 2;
+            this.lblUserNm.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // dataGridViewDisableButtonColumn1
+            // 
+            this.dataGridViewDisableButtonColumn1.DataPropertyName = "START_BUTTON";
+            this.dataGridViewDisableButtonColumn1.HeaderText = "";
+            this.dataGridViewDisableButtonColumn1.Name = "dataGridViewDisableButtonColumn1";
+            this.dataGridViewDisableButtonColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewDisableButtonColumn1.Width = 60;
+            // 
+            // dataGridViewDisableButtonColumn2
+            // 
+            this.dataGridViewDisableButtonColumn2.DataPropertyName = "END_BUTTON";
+            this.dataGridViewDisableButtonColumn2.HeaderText = "";
+            this.dataGridViewDisableButtonColumn2.Name = "dataGridViewDisableButtonColumn2";
+            this.dataGridViewDisableButtonColumn2.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewDisableButtonColumn2.Width = 60;
+            // 
+            // dataGridViewDisableButtonColumn3
+            // 
+            this.dataGridViewDisableButtonColumn3.DataPropertyName = "COLLECT_BUTTON";
+            this.dataGridViewDisableButtonColumn3.HeaderText = "";
+            this.dataGridViewDisableButtonColumn3.Name = "dataGridViewDisableButtonColumn3";
+            this.dataGridViewDisableButtonColumn3.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewDisableButtonColumn3.Width = 60;
+            // 
+            // dataGridViewButtonColumn1
+            // 
+            this.dataGridViewButtonColumn1.DataPropertyName = "START_BUTTON";
+            this.dataGridViewButtonColumn1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.dataGridViewButtonColumn1.HeaderText = "";
+            this.dataGridViewButtonColumn1.Name = "dataGridViewButtonColumn1";
+            this.dataGridViewButtonColumn1.Width = 60;
+            // 
+            // dataGridViewButtonColumn2
+            // 
+            this.dataGridViewButtonColumn2.DataPropertyName = "END_BUTTON";
+            this.dataGridViewButtonColumn2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.dataGridViewButtonColumn2.HeaderText = "";
+            this.dataGridViewButtonColumn2.Name = "dataGridViewButtonColumn2";
+            this.dataGridViewButtonColumn2.Width = 60;
+            // 
+            // dataGridViewButtonColumn3
+            // 
+            this.dataGridViewButtonColumn3.DataPropertyName = "COLLECT_BUTTON";
+            this.dataGridViewButtonColumn3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.dataGridViewButtonColumn3.HeaderText = "";
+            this.dataGridViewButtonColumn3.Name = "dataGridViewButtonColumn3";
+            this.dataGridViewButtonColumn3.Width = 60;
+            // 
             // SAGYO_CD
             // 
             this.SAGYO_CD.DataPropertyName = "SAGYO_CD";
@@ -169,8 +280,12 @@
             // PARENT_FLG
             // 
             this.PARENT_FLG.DataPropertyName = "PARENT_FLG";
+            this.PARENT_FLG.FalseValue = "false";
             this.PARENT_FLG.HeaderText = "PARENT_FLG";
             this.PARENT_FLG.Name = "PARENT_FLG";
+            this.PARENT_FLG.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.PARENT_FLG.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.PARENT_FLG.TrueValue = "true";
             this.PARENT_FLG.Visible = false;
             // 
             // START_BUTTON
@@ -333,90 +448,6 @@
             this.CHANGE_FLG.TrueValue = "True";
             this.CHANGE_FLG.Visible = false;
             // 
-            // pnlHeader
-            // 
-            this.pnlHeader.Controls.Add(this.lblYear);
-            this.pnlHeader.Controls.Add(this.lblGyomu);
-            this.pnlHeader.Controls.Add(this.label8);
-            this.pnlHeader.Controls.Add(this.label10);
-            this.pnlHeader.Location = new System.Drawing.Point(26, 32);
-            this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(747, 66);
-            this.pnlHeader.TabIndex = 26;
-            // 
-            // lblYear
-            // 
-            this.lblYear.AutoSize = true;
-            this.lblYear.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblYear.Location = new System.Drawing.Point(61, 6);
-            this.lblYear.Name = "lblYear";
-            this.lblYear.Size = new System.Drawing.Size(42, 16);
-            this.lblYear.TabIndex = 107;
-            this.lblYear.Text = "年月";
-            // 
-            // lblGyomu
-            // 
-            this.lblGyomu.AutoSize = true;
-            this.lblGyomu.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblGyomu.Location = new System.Drawing.Point(61, 41);
-            this.lblGyomu.Name = "lblGyomu";
-            this.lblGyomu.Size = new System.Drawing.Size(59, 16);
-            this.lblGyomu.TabIndex = 9;
-            this.lblGyomu.Text = "業務名";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label8.Location = new System.Drawing.Point(5, 41);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(40, 16);
-            this.label8.TabIndex = 7;
-            this.label8.Text = "業務";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label10.Location = new System.Drawing.Point(5, 6);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(40, 16);
-            this.label10.TabIndex = 3;
-            this.label10.Text = "年月";
-            // 
-            // lblUserNm
-            // 
-            this.lblUserNm.Font = new System.Drawing.Font("MS UI Gothic", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblUserNm.Location = new System.Drawing.Point(662, 11);
-            this.lblUserNm.Name = "lblUserNm";
-            this.lblUserNm.Size = new System.Drawing.Size(530, 18);
-            this.lblUserNm.TabIndex = 2;
-            this.lblUserNm.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // dataGridViewButtonColumn1
-            // 
-            this.dataGridViewButtonColumn1.DataPropertyName = "START_BUTTON";
-            this.dataGridViewButtonColumn1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.dataGridViewButtonColumn1.HeaderText = "";
-            this.dataGridViewButtonColumn1.Name = "dataGridViewButtonColumn1";
-            this.dataGridViewButtonColumn1.Width = 60;
-            // 
-            // dataGridViewButtonColumn2
-            // 
-            this.dataGridViewButtonColumn2.DataPropertyName = "END_BUTTON";
-            this.dataGridViewButtonColumn2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.dataGridViewButtonColumn2.HeaderText = "";
-            this.dataGridViewButtonColumn2.Name = "dataGridViewButtonColumn2";
-            this.dataGridViewButtonColumn2.Width = 60;
-            // 
-            // dataGridViewButtonColumn3
-            // 
-            this.dataGridViewButtonColumn3.DataPropertyName = "COLLECT_BUTTON";
-            this.dataGridViewButtonColumn3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.dataGridViewButtonColumn3.HeaderText = "";
-            this.dataGridViewButtonColumn3.Name = "dataGridViewButtonColumn3";
-            this.dataGridViewButtonColumn3.Width = 60;
-            // 
             // GC0040
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -453,9 +484,12 @@
         private System.Windows.Forms.Label lblUserNm;
         private System.Windows.Forms.Label lblGyomu;
         private System.Windows.Forms.Label lblYear;
+        private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn1;
+        private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn2;
+        private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_CD;
         private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_NAME;
-        private System.Windows.Forms.DataGridViewTextBoxColumn PARENT_FLG;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn PARENT_FLG;
         private DataGridViewDisableButtonColumn START_BUTTON;
         private DataGridViewDisableButtonColumn END_BUTTON;
         private DataGridViewDisableButtonColumn COLLECT_BUTTON;
@@ -475,8 +509,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn BIKOU;
         private System.Windows.Forms.DataGridViewTextBoxColumn BIKOU_OLD;
         private System.Windows.Forms.DataGridViewCheckBoxColumn CHANGE_FLG;
-        private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn1;
-        private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn2;
-        private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn3;
+        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn1;
+        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn2;
+        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn3;
     }
 }

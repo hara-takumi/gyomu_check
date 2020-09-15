@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -9,15 +10,19 @@ namespace GYOMU_CHECK
 {
     public partial class GC0050 : Form
     {
-        private User user;
-        CommonUtil comU = new CommonUtil();
+        private readonly User user;
+        private readonly CommonUtil comU = new CommonUtil();
         public bool torokuFlg = false;
-        bool errorFlg = false;
-        bool changeFlg = false;
-        bool headerChangeFlg = false;
+        private bool errorFlg = false;
+        private bool changeFlg = false;
+        private bool headerChangeFlg = false;
         private string sagyoState;
-        private string stateMode;
+        private readonly string stateMode;
         MySqlCommand command = new MySqlCommand();
+        string gamenMode;
+        string sagyoYYMM;
+        private readonly string gyomuCd;
+        private readonly string programId = "GC0050";
 
         public enum column
         {
@@ -32,27 +37,24 @@ namespace GYOMU_CHECK
             TRN_CHECK_B_SAGYO_DATE
         }
 
-        public enum mode
+        public enum Mode
         {
             INSERT,
             UPDATE
         }
 
-        int gamenMode;
-        string sagyoYYMM;
-        string gyomuCd;
-        string programId = "GC0050";
+        
         public GC0050(User user)
         {
             this.user = user;
-            gamenMode = (int)mode.INSERT;
+            gamenMode = "INSERT";
             InitializeComponent();
         }
 
         public GC0050(User user, string yyyyMM, string Cd, string state)
         {
             this.user = user;
-            gamenMode = (int)mode.UPDATE;
+            gamenMode = "UPDATE";
             sagyoYYMM = comU.CReplace(yyyyMM);
             gyomuCd = Cd;
             stateMode = state;
@@ -70,7 +72,11 @@ namespace GYOMU_CHECK
             lblUserNm.Text = user.Name;
         }
 
-
+        /// <summary>
+        /// ✕ボタン処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Proto_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!errorFlg && !torokuFlg)
@@ -82,8 +88,10 @@ namespace GYOMU_CHECK
                     //何が選択されたか調べる
                     if (result == DialogResult.Yes)
                     {
-                        if (gamenMode == (int)mode.UPDATE)
+                        //更新で遷移された場合
+                        if (gamenMode == "UPDATE")
                         {
+                            //排他削除
                             DeleteHaita();
                         }
                         else
@@ -98,8 +106,10 @@ namespace GYOMU_CHECK
                 }
                 else
                 {
-                    if (gamenMode == (int)mode.UPDATE)
+                    //更新で遷移された場合
+                    if (gamenMode == "UPDATE")
                     {
+                        //排他削除
                         DeleteHaita();
                     }
                 }
@@ -111,31 +121,28 @@ namespace GYOMU_CHECK
         /// </summary>
         public void Initialization()
         {
-
-
-
             //新規の場合
-            if (gamenMode == (int)mode.INSERT)
+            if (gamenMode == "INSERT")
             {
                 DataSet dataSet = new DataSet();
                 if (!comU.CGyomu(ref dataSet, false))
                 {
                     errorFlg = true;
-                    this.Close();
+                    Close();
                     return;
                 }
                 pnlIns.Visible = true;
                 pnlUpd.Visible = false;
                 // コンボボックスにデータテーブルをセット
-                this.cmbKbn.DataSource = dataSet.Tables[0];
+                cmbKbn.DataSource = dataSet.Tables[0];
                 // 表示用の列を設定
-                this.cmbKbn.DisplayMember = "NAME";
-                //// データ用の列を設定
-                this.cmbKbn.ValueMember = "CD";
-                this.cmbKbn.SelectedIndex = -1;
+                cmbKbn.DisplayMember = "NAME";
+                // データ用の列を設定
+                cmbKbn.ValueMember = "CD";
+                cmbKbn.SelectedIndex = -1;
 
                 //コンボボックス設定(年月)
-                DateTime dt = System.DateTime.Now;
+                DateTime dt = DateTime.Now;
                 cmbYear.DataSource = comU.CYear(false).ToArray();
                 cmbYear.Text = dt.ToString("yyyy");
                 cmbMonth.DataSource = comU.CMonth(false).ToArray();
@@ -145,7 +152,7 @@ namespace GYOMU_CHECK
                 btnInsert.Enabled = false;
                 lblUpd.Visible = false;
 
-                this.ActiveControl = this.cmbKbn;
+                ActiveControl = cmbKbn;
             }
             //更新の場合
             else
@@ -162,10 +169,17 @@ namespace GYOMU_CHECK
                 cmbMonth.Enabled = false;
                 cmbKbn.Enabled = false;
                 btnInsert.Text = "更新";
+                //排他登録
                 TorokuHaita();
+                //更新時一覧表示
                 DisplyUpdate();
             }
         }
+
+        /// <summary>
+        /// 業務名取得
+        /// </summary>
+        /// <param name="gyomuName"></param>
         private void GetGyomuName(ref string gyomuName)
         {
             StringBuilder sql = new StringBuilder();
@@ -183,9 +197,11 @@ namespace GYOMU_CHECK
             {
                 return;
             }
-            if (ds.Tables["Table1"].Rows.Count != 0)
+            if (ds.Tables[0].Rows.Count != 0)
             {
-                gyomuName = ds.Tables["Table1"].Rows[0]["NAME"].ToString();
+                DataRow dr = ds.Tables[0].AsEnumerable().First();
+                gyomuName = dr["NAME"].ToString();
+                //gyomuName = ds.Tables[0].Rows[0]["NAME"].ToString();
             }
             else
             {
@@ -242,9 +258,8 @@ namespace GYOMU_CHECK
         /// <param name="e"></param>
         private void btnReturn_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
-
 
         /// <summary>
         /// 作成ボタン
@@ -273,6 +288,7 @@ namespace GYOMU_CHECK
             }
 
             Clear();
+            //新規一覧表示
             DisplyInsert();
         }
 
@@ -288,7 +304,7 @@ namespace GYOMU_CHECK
             sql.Append($" WHERE GYOMU_CD = {cmbKbn.SelectedValue}");
             sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
 
-            if (this.cmbKbn.SelectedIndex == -1)
+            if (cmbKbn.SelectedIndex == -1)
             {
                 MessageBox.Show("業務を選択してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
@@ -299,19 +315,19 @@ namespace GYOMU_CHECK
             {
                 return false;
             }
-            if (ds.Tables["Table1"].Rows.Count > 0)
+            if (ds.Tables[0].Rows.Count > 0)
             {
                 MessageBox.Show("すでに作成済みの業務です。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
-
         }
 
-
+        /// <summary>
+        /// 新規登録時表示
+        /// </summary>
         private void DisplyInsert()
         {
-
             StringBuilder sql = new StringBuilder();
             sql.Append(" SELECT ");
             sql.Append("     CD");
@@ -322,72 +338,118 @@ namespace GYOMU_CHECK
             sql.Append($" AND GYOMU_CD = {cmbKbn.SelectedValue}");
             sql.Append(" ORDER BY HYOJI_JUN");
 
-
             DataSet ds = new DataSet();
             if (!comU.CSerch(sql.ToString(), ref ds))
             {
                 btnInsert.Enabled = false;
                 return;
             }
-            if (ds.Tables["Table1"].Rows.Count == 0)
+            if (ds.Tables[0].Rows.Count == 0)
             {
                 MessageBox.Show("指定した業務の作業が登録されていません。\n\r作業マスタの登録を行ってください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 btnInsert.Enabled = false;
                 return;
             }
 
-            dgvIchiran.DataSource = ds.Tables[0];
             btnInsert.Enabled = true;
             headerChangeFlg = false;
             changeFlg = false;
 
+            //実施要否チェックボックス作成
             DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
             dgvcbc.Name = "実施要否";
-            dgvcbc.Width = 80;
-            dgvIchiran.Columns.Insert((int)column.TRN_CHECK_B_DISUSE_FLG, dgvcbc);
-            dgvcbc.TrueValue = true;
-            dgvcbc.FalseValue = false;
+
+            dgvIchiran.Columns["STATUS_NAME"].Visible = false;
+
+            //一覧に検索結果を表示
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, ds.Tables[0].Rows.Count).Select(indx => ds.Tables[0].Rows[indx] as DataRow).ToList()
+                .ForEach(dr =>
+                {
+                    dgvIchiran.Rows.Add();
+                    int indx = dgvIchiran.Rows.Count - 1;
+                    dgvIchiran.Rows[indx].Cells["SAGYO_CD"].Value = dr["CD"].ToString();
+                    dgvIchiran.Rows[indx].Cells["SAGYO_NAME"].Value = dr["NAME"].ToString();
+                    dgvIchiran.Rows[indx].Cells["PARENT_FLG"].Value = dr["PARENT_FLG"].ToString();
+
+                    //偶数行の背景を青色に変更
+                    if (indx % 2 == 1)
+                    {
+                        dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightBlue;
+                    }
+
+                    //親項目は背景緑に変更
+                    if ((bool)dr["PARENT_FLG"])
+                    {
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"] = new DataGridViewTextBoxCell();
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"].Value = "";
+                        dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightGreen;
+                        dgvIchiran.Rows[indx].ReadOnly = true;
+                    }
+                    //親項目以外はチェックボックス
+                    else
+                    {
+                        DataGridViewCheckBoxCell cell = new DataGridViewCheckBoxCell();
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"] = cell;
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"].Value = true;
+                    }
+                });
+
+
+            //dgvIchiran.DataSource = ds.Tables[0];
+            //btnInsert.Enabled = true;
+            //headerChangeFlg = false;
+            //changeFlg = false;
+
+            //DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
+            //dgvcbc.Name = "実施要否";
+            //dgvcbc.Width = 80;
+            //dgvIchiran.Columns.Insert((int)column.TRN_CHECK_B_DISUSE_FLG, dgvcbc);
+            //dgvcbc.TrueValue = true;
+            //dgvcbc.FalseValue = false;
 
             //一覧表示
-            dgvIchiran.Columns[(int)column.MST_SAGYO_CD].Visible = false;
-            dgvIchiran.Columns[(int)column.MST_SAGYO_PARENT_FLG].Visible = false;
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].HeaderText = "";
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Width = 400;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_CD].Visible = false;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_PARENT_FLG].Visible = false;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].HeaderText = "";
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Width = 400;
 
             //実施要否チェック済み
-            for (int i = 0; i < dgvIchiran.RowCount; i++)
-            {
-                if (i % 2 == 1)
-                {
-                    dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightBlue;
-                }
+            //for (int i = 0; i < dgvIchiran.RowCount; i++)
+            //{
+            //    if (i % 2 == 1)
+            //    {
+            //        dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightBlue;
+            //    }
 
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
-                {
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i] = new DataGridViewTextBoxCell();
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = "";
-                    dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightGreen;
-                    dgvIchiran.Rows[i].ReadOnly = true;
-                }
-                else
-                {
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i] = new DataGridViewTextBoxCell();
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = "";
+            //        dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightGreen;
+            //        dgvIchiran.Rows[i].ReadOnly = true;
+            //    }
+            //    else
+            //    {
 
-                    DataGridViewCheckBoxCell cell = new DataGridViewCheckBoxCell();
-                    dgvIchiran[2, i] = cell;
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = true;
-                }
+            //        DataGridViewCheckBoxCell cell = new DataGridViewCheckBoxCell();
+            //        dgvIchiran[2, i] = cell;
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = true;
+            //    }
 
-            }
-            dgvIchiran.Columns[1].ReadOnly = true;
-            foreach (DataGridViewColumn column in this.dgvIchiran.Columns)
-            {
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
-
+            //}
+            //dgvIchiran.Columns[1].ReadOnly = true;
+            //foreach (DataGridViewColumn column in this.dgvIchiran.Columns)
+            //{
+            //    column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            //}
         }
+
+        /// <summary>
+        /// 更新時表示
+        /// </summary>
         private void DisplyUpdate()
         {
-
             StringBuilder sql = new StringBuilder();
             sql.Append(" SELECT ");
             sql.Append("     TRN_CHECK_B.SAGYO_CD");
@@ -398,7 +460,7 @@ namespace GYOMU_CHECK
             sql.Append("    ,CASE WHEN MST_SAGYO.PARENT_FLG = '1' THEN ''");
             sql.Append("    WHEN trn_check_B.SAGYO_STATUS = '0' THEN '未着手'");
             sql.Append("    WHEN trn_check_B.SAGYO_STATUS = '1' THEN '処理中'");
-            sql.Append("    ELSE '完了' END");
+            sql.Append("    ELSE '完了' END AS STATUS_NAME");
             sql.Append("    ,TRN_CHECK_B.SAGYO_END_USER");
             sql.Append("    ,TRN_CHECK_B.SAGYO_END_DATE");
             sql.Append(" FROM TRN_CHECK_B");
@@ -409,82 +471,128 @@ namespace GYOMU_CHECK
             sql.Append($" AND TRN_CHECK_B.SAGYO_YYMM = {sagyoYYMM}");
             sql.Append(" ORDER BY MST_SAGYO.HYOJI_JUN");
 
-
             DataSet ds = new DataSet();
             if (!comU.CSerch(sql.ToString(), ref ds))
             {
-                this.Close();
+                Close();
                 return;
             }
-            if (ds.Tables["Table1"].Rows.Count == 0)
+            if (ds.Tables[0].Rows.Count == 0)
             {
                 MessageBox.Show("指定した業務の作業が登録されていません。\n\r作業マスタの登録を行ってください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
+                Close();
             }
-            dgvIchiran.DataSource = ds.Tables[0];
 
             //セルチェックボックス作成
             DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
-            dgvIchiran.Columns.Insert((int)column.TRN_CHECK_B_DISUSE_FLG, dgvcbc);
-            dgvcbc.TrueValue = true;
-            dgvcbc.FalseValue = false;
 
-            //一覧表示
-            dgvIchiran.Columns[(int)column.MST_SAGYO_CD].Visible = false;
-            dgvIchiran.Columns[(int)column.MST_SAGYO_PARENT_FLG].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_STATUS].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_USER].Visible = false;
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_DATE].Visible = false;
-
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].HeaderText = "";
-
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Width = 400;
-
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_DISUSE_FLG].HeaderText = "実施要否";
-            dgvIchiran.Columns[(int)column.STATUS_NAME].HeaderText = "状況";
-            dgvIchiran.Columns[(int)column.TRN_CHECK_B_DISUSE_FLG].Width = 80;
-
-            dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.STATUS_NAME].ReadOnly = true;
-            dgvIchiran.Columns[(int)column.STATUS_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-            //明細背景色変更
-            for (int i = 0; i < dgvIchiran.RowCount; i++)
-            {
-                if (i % 2 == 1)
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, ds.Tables[0].Rows.Count).Select(indx => ds.Tables[0].Rows[indx] as DataRow).ToList()
+                .ForEach(dr => 
                 {
-                    dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightBlue;
-                }
-                //親作業の場合、背景色緑、テキスト非活性
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
-                {
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i] = new DataGridViewTextBoxCell();
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = "";
-                    dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightGreen;
-                    dgvIchiran.Rows[i].ReadOnly = true;
-                }
-                else
-                {
-                    DataGridViewCheckBoxCell cell = new DataGridViewCheckBoxCell();
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i] = cell;
-                    dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value;
-                }
+                    dgvIchiran.Rows.Add();
+                    int indx = dgvIchiran.Rows.Count - 1;
+                    dgvIchiran.Rows[indx].Cells["SAGYO_CD"].Value = dr["SAGYO_CD"].ToString();
+                    dgvIchiran.Rows[indx].Cells["SAGYO_NAME"].Value = dr["NAME"].ToString();
+                    dgvIchiran.Rows[indx].Cells["PARENT_FLG"].Value = dr["PARENT_FLG"].ToString();
+                    dgvIchiran.Rows[indx].Cells["DISUSE_FLG"].Value = dr["DISUSE_FLG"].ToString();
+                    dgvIchiran.Rows[indx].Cells["SAGYO_STATUS"].Value = dr["SAGYO_STATUS"].ToString();
+                    dgvIchiran.Rows[indx].Cells["STATUS_NAME"].Value = dr["STATUS_NAME"].ToString();
+                    dgvIchiran.Rows[indx].Cells["SAGYO_USER"].Value = dr["SAGYO_END_USER"].ToString();
+                    dgvIchiran.Rows[indx].Cells["SAGYO_DATE"].Value = dr["SAGYO_END_DATE"].ToString();
 
-                //STATUSが未実施以外の場合、編集不可
-                //「処理中」「完了」を赤文字                
-                if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value != "0")
-                {
-                    dgvIchiran.Rows[i].ReadOnly = true;
-                    dgvIchiran.Rows[i].Cells[(int)column.STATUS_NAME].Style.ForeColor = Color.Red;
-                }
+                    //偶数行の背景を青色に変更
+                    if (indx % 2 == 1)
+                    {
+                        dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightBlue;
+                    }
+                    //親作業の場合、背景色緑、テキスト非活性
+                    if ((bool)dr["PARENT_FLG"])
+                    {
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"] = new DataGridViewTextBoxCell();
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"].Value = "";
+                        dgvIchiran.Rows[indx].DefaultCellStyle.BackColor = Color.LightGreen;
+                    }
+                    else
+                    {
+                        DataGridViewCheckBoxCell cell = new DataGridViewCheckBoxCell();
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"] = cell;
+                        dgvIchiran.Rows[indx].Cells["DISUSE_FLG"].Value = dgvIchiran.Rows[indx].Cells["DISUSE_FLG_OLD"].Value;
+                    }
 
-            }
-            foreach (DataGridViewColumn column in this.dgvIchiran.Columns)
-            {
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
+                    //STATUSが未実施以外の場合、編集不可
+                    //「処理中」「完了」を赤文字                
+                    if (dgvIchiran.Rows[indx].Cells["SAGYO_STATUS"].Value.ToString() != "0")
+                    {
+                        dgvIchiran.Rows[indx].Cells["STATUS_NAME"].Style.ForeColor = Color.Red;
+                    }
+                });
+
+            //dgvIchiran.DataSource = ds.Tables[0];
+
+            ////セルチェックボックス作成
+            //DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
+            //dgvIchiran.Columns.Insert((int)column.TRN_CHECK_B_DISUSE_FLG, dgvcbc);
+            //dgvcbc.TrueValue = true;
+            //dgvcbc.FalseValue = false;
+
+            ////一覧表示
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_CD].Visible = false;
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_PARENT_FLG].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_STATUS].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_USER].Visible = false;
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_SAGYO_DATE].Visible = false;
+
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].HeaderText = "";
+
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].Width = 400;
+
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_DISUSE_FLG].HeaderText = "実施要否";
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].HeaderText = "状況";
+            //dgvIchiran.Columns[(int)column.TRN_CHECK_B_DISUSE_FLG].Width = 80;
+
+            //dgvIchiran.Columns[(int)column.MST_SAGYO_NAME].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].ReadOnly = true;
+            //dgvIchiran.Columns[(int)column.STATUS_NAME].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            ////明細背景色変更
+            //for (int i = 0; i < dgvIchiran.RowCount; i++)
+            //{
+            //    if (i % 2 == 1)
+            //    {
+            //        dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightBlue;
+            //    }
+            //    //親作業の場合、背景色緑、テキスト非活性
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i] = new DataGridViewTextBoxCell();
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = "";
+            //        dgvIchiran.Rows[i].DefaultCellStyle.BackColor = Color.LightGreen;
+            //        dgvIchiran.Rows[i].ReadOnly = true;
+            //    }
+            //    else
+            //    {
+            //        DataGridViewCheckBoxCell cell = new DataGridViewCheckBoxCell();
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i] = cell;
+            //        dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value = dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value;
+            //    }
+
+            //    //STATUSが未実施以外の場合、編集不可
+            //    //「処理中」「完了」を赤文字                
+            //    if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value != "0")
+            //    {
+            //        dgvIchiran.Rows[i].ReadOnly = true;
+            //        dgvIchiran.Rows[i].Cells[(int)column.STATUS_NAME].Style.ForeColor = Color.Red;
+            //    }
+
+            //}
+            //foreach (DataGridViewColumn column in this.dgvIchiran.Columns)
+            //{
+            //    column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            //}
         }
+
         /// <summary>
         /// クリアボタン
         /// </summary>
@@ -492,29 +600,40 @@ namespace GYOMU_CHECK
         {
             if (dgvIchiran.RowCount != 0)
             {
-                dgvIchiran.DataSource = null;
+                //dgvIchiran.DataSource = null;
                 dgvIchiran.Rows.Clear();
-                dgvIchiran.Columns.Clear();
+                //dgvIchiran.Columns.Clear();
             }
         }
 
+        /// <summary>
+        /// セルクリック時処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgvIchiran_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex == -1)
             {
                 return;
             }
-            if (e.ColumnIndex == (int)column.TRN_CHECK_B_DISUSE_FLG)
+            DataGridView dgv = (DataGridView)sender;
+            if (dgv.Columns[e.ColumnIndex].Name == "TRN_CHECK_B_DISUSE_FLG")
             {
                 //変更フラグ
                 changeFlg = true;
             }
         }
 
+        /// <summary>
+        /// 登録ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnInsert_Click(object sender, EventArgs e)
         {
             //新規の場合
-            if (gamenMode == (int)mode.INSERT)
+            if (gamenMode == "INSERT")
             {
                 if (headerChangeFlg)
                 {
@@ -522,19 +641,21 @@ namespace GYOMU_CHECK
                 }
                 else
                 {
+                    //登録処理
                     Toroku();
                 }
             }
             else
             {
-                Update();
+                //更新処理
+                UpdateGyomu();
             }
-
         }
+
         /// <summary>
         ///更新処理
         /// </summary>
-        private void Update()
+        private void UpdateGyomu()
         {
             if (!CheckToroku())
             {
@@ -560,12 +681,10 @@ namespace GYOMU_CHECK
                 {
                     if (!UpdateGyomuCheckHeader(transaction))
                     {
-
                         MessageBox.Show("業務チェックヘッダの更新に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
-
 
                 if (!UpdateGyomuCheckBody(transaction))
                 {
@@ -575,16 +694,20 @@ namespace GYOMU_CHECK
                 transaction.Commit();
 
                 MessageBox.Show("更新が完了しました。", "");
-                if (gamenMode == (int)mode.UPDATE)
+                if (gamenMode == "UPDATE")
                 {
                     DeleteHaita();
                 }
                 torokuFlg = true;
-                this.Close();
+                Close();
             }
         }
         
-
+        /// <summary>
+        /// CHEAK_Hテーブル登録処理
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool UpdateGyomuCheckHeader(MySqlTransaction transaction)
         {
             String sagyoDate = null;
@@ -598,8 +721,8 @@ namespace GYOMU_CHECK
                     {
                         return false;
                     }
-                    sagyoUser = ds.Tables["Table1"].Rows[0]["SAGYO_START_USER"].ToString();
-                    sagyoDate = ((DateTime)ds.Tables["Table1"].Rows[0]["SAGYO_START_DATE"]).ToString("yyyyMMdd");
+                    sagyoUser = ds.Tables[0].Rows[0]["SAGYO_START_USER"].ToString();
+                    sagyoDate = ((DateTime)ds.Tables[0].Rows[0]["SAGYO_START_DATE"]).ToString("yyyyMMdd");
                 }
                 else
                 {
@@ -608,8 +731,8 @@ namespace GYOMU_CHECK
                     {
                         return false;
                     }
-                    sagyoUser = ds.Tables["Table1"].Rows[0]["SAGYO_END_USER"].ToString();
-                    sagyoDate = ((DateTime)ds.Tables["Table1"].Rows[0]["SAGYO_END_DATE"]).ToString("yyyyMMdd");
+                    sagyoUser = ds.Tables[0].Rows[0]["SAGYO_END_USER"].ToString();
+                    sagyoDate = ((DateTime)ds.Tables[0].Rows[0]["SAGYO_END_DATE"]).ToString("yyyyMMdd");
                 }
             }
 
@@ -635,6 +758,12 @@ namespace GYOMU_CHECK
             }
             return true;
         }
+
+        /// <summary>
+        /// CHEAK_Bテーブル登録処理
+        /// </summary>
+        /// <param name="ds"></param>
+        /// <returns></returns>
         private bool GetCheckMeisai(ref DataSet ds)
         {
             StringBuilder sql = new StringBuilder();
@@ -661,6 +790,11 @@ namespace GYOMU_CHECK
             }
             return true;
         }
+
+        /// <summary>
+        /// CHEAK_Hテーブル更新処理
+        /// </summary>
+        /// <returns></returns>
         private bool CheckUpdateGyomuHeader()
         {
             for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
@@ -915,7 +1049,7 @@ namespace GYOMU_CHECK
                     return;
                 }
                 transaction.Commit();
-                if (gamenMode == (int)mode.UPDATE)
+                if (gamenMode == "UPDATE")
                 {
                     DeleteHaita();
                 }
@@ -963,7 +1097,7 @@ namespace GYOMU_CHECK
         private bool ChangeDetection()
         {
             //新規の場合
-            if (gamenMode == (int)mode.INSERT)
+            if (gamenMode == "INSERT")
             {
                 return changeFlg;
             }

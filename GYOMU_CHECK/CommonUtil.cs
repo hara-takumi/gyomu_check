@@ -74,7 +74,6 @@ namespace GYOMU_CHECK
         /// <returns></returns>
         public bool CExecute(ref MySqlTransaction transaction, ref MySqlCommand command, string sql)
         {
-
             try
             {
                 command.CommandText = sql;
@@ -92,7 +91,6 @@ namespace GYOMU_CHECK
                 command.Connection.Close();
                 return false;
             }
-
         }
 
         /// <summary>
