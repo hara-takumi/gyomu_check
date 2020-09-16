@@ -28,12 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label3 = new System.Windows.Forms.Label();
             this.cmbMonth = new System.Windows.Forms.ComboBox();
             this.cmbYear = new System.Windows.Forms.ComboBox();
             this.dgvIchiran = new System.Windows.Forms.DataGridView();
+            this.SAGYO_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PARENT_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.DISUSE_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.DISUSE_FLG_OLD = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.SAGYO_STATUS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.STATUS_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_USER = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_DATE = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label2 = new System.Windows.Forms.Label();
             this.btnInsert = new System.Windows.Forms.Button();
             this.btnReturn = new System.Windows.Forms.Button();
@@ -48,15 +57,6 @@
             this.lblYear = new System.Windows.Forms.Label();
             this.lblGyomu = new System.Windows.Forms.Label();
             this.pnlIns = new System.Windows.Forms.Panel();
-            this.SAGYO_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.PARENT_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.DISUSE_FLG = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.DISUSE_FLG_OLD = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.SAGYO_STATUS = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.STATUS_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_USER = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_DATE = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvIchiran)).BeginInit();
             this.pnlUpd.SuspendLayout();
             this.pnlIns.SuspendLayout();
@@ -82,7 +82,7 @@
             this.cmbMonth.Name = "cmbMonth";
             this.cmbMonth.Size = new System.Drawing.Size(43, 24);
             this.cmbMonth.TabIndex = 2;
-            this.cmbMonth.SelectedIndexChanged += new System.EventHandler(this.cmbMonth_SelectedIndexChanged);
+            this.cmbMonth.SelectedValueChanged += new System.EventHandler(this.cmbMonth_SelectedValueChanged);
             // 
             // cmbYear
             // 
@@ -95,21 +95,22 @@
             this.cmbYear.Name = "cmbYear";
             this.cmbYear.Size = new System.Drawing.Size(65, 24);
             this.cmbYear.TabIndex = 1;
-            this.cmbYear.SelectedIndexChanged += new System.EventHandler(this.cmbYear_SelectedIndexChanged);
+            this.cmbYear.SelectedValueChanged += new System.EventHandler(this.cmbYear_SelectedValueChanged);
             // 
             // dgvIchiran
             // 
             this.dgvIchiran.AllowUserToAddRows = false;
             this.dgvIchiran.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvIchiran.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvIchiran.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("MS UI Gothic", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvIchiran.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle13;
+            this.dgvIchiran.ColumnHeadersHeight = 30;
+            this.dgvIchiran.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.dgvIchiran.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.SAGYO_CD,
             this.SAGYO_NAME,
@@ -128,6 +129,79 @@
             this.dgvIchiran.Size = new System.Drawing.Size(1166, 437);
             this.dgvIchiran.TabIndex = 5;
             this.dgvIchiran.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvIchiran_CellContentClick);
+            // 
+            // SAGYO_CD
+            // 
+            this.SAGYO_CD.DataPropertyName = "SAGYO_CD";
+            this.SAGYO_CD.HeaderText = "MST_SAGYO_CD";
+            this.SAGYO_CD.Name = "SAGYO_CD";
+            this.SAGYO_CD.Visible = false;
+            // 
+            // SAGYO_NAME
+            // 
+            this.SAGYO_NAME.DataPropertyName = "SAGYO_NAME";
+            this.SAGYO_NAME.HeaderText = "";
+            this.SAGYO_NAME.Name = "SAGYO_NAME";
+            this.SAGYO_NAME.ReadOnly = true;
+            this.SAGYO_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.SAGYO_NAME.Width = 400;
+            // 
+            // PARENT_FLG
+            // 
+            this.PARENT_FLG.DataPropertyName = "PARENT_FLG";
+            this.PARENT_FLG.FalseValue = "false";
+            this.PARENT_FLG.HeaderText = "PARENT_FLG";
+            this.PARENT_FLG.Name = "PARENT_FLG";
+            this.PARENT_FLG.TrueValue = "true";
+            this.PARENT_FLG.Visible = false;
+            // 
+            // DISUSE_FLG
+            // 
+            this.DISUSE_FLG.DataPropertyName = "DISUSE_FLG";
+            this.DISUSE_FLG.FalseValue = "false";
+            this.DISUSE_FLG.HeaderText = "実施要否";
+            this.DISUSE_FLG.Name = "DISUSE_FLG";
+            this.DISUSE_FLG.TrueValue = "true";
+            // 
+            // DISUSE_FLG_OLD
+            // 
+            this.DISUSE_FLG_OLD.DataPropertyName = "DISUSE_FLG_OLD";
+            this.DISUSE_FLG_OLD.FalseValue = "false";
+            this.DISUSE_FLG_OLD.HeaderText = "DISUSE_FLG_OLD";
+            this.DISUSE_FLG_OLD.Name = "DISUSE_FLG_OLD";
+            this.DISUSE_FLG_OLD.TrueValue = "true";
+            this.DISUSE_FLG_OLD.Visible = false;
+            // 
+            // SAGYO_STATUS
+            // 
+            this.SAGYO_STATUS.DataPropertyName = "SAGYO_STATUS";
+            this.SAGYO_STATUS.HeaderText = "SAGYO_STATUS";
+            this.SAGYO_STATUS.Name = "SAGYO_STATUS";
+            this.SAGYO_STATUS.Visible = false;
+            // 
+            // STATUS_NAME
+            // 
+            this.STATUS_NAME.DataPropertyName = "STATUS_NAME";
+            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.STATUS_NAME.DefaultCellStyle = dataGridViewCellStyle14;
+            this.STATUS_NAME.HeaderText = "状況";
+            this.STATUS_NAME.Name = "STATUS_NAME";
+            this.STATUS_NAME.ReadOnly = true;
+            this.STATUS_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // SAGYO_USER
+            // 
+            this.SAGYO_USER.DataPropertyName = "SAGYO_USER";
+            this.SAGYO_USER.HeaderText = "SAGYO_USER";
+            this.SAGYO_USER.Name = "SAGYO_USER";
+            this.SAGYO_USER.Visible = false;
+            // 
+            // SAGYO_DATE
+            // 
+            this.SAGYO_DATE.DataPropertyName = "SAGYO_DATE";
+            this.SAGYO_DATE.HeaderText = "SAGYO_DATE";
+            this.SAGYO_DATE.Name = "SAGYO_DATE";
+            this.SAGYO_DATE.Visible = false;
             // 
             // label2
             // 
@@ -180,7 +254,7 @@
             this.cmbKbn.Name = "cmbKbn";
             this.cmbKbn.Size = new System.Drawing.Size(136, 20);
             this.cmbKbn.TabIndex = 3;
-            this.cmbKbn.SelectedIndexChanged += new System.EventHandler(this.cmbKbn_SelectedIndexChanged);
+            this.cmbKbn.SelectedValueChanged += new System.EventHandler(this.cmbKbn_SelectedValueChanged);
             // 
             // label6
             // 
@@ -272,79 +346,6 @@
             this.pnlIns.Name = "pnlIns";
             this.pnlIns.Size = new System.Drawing.Size(232, 76);
             this.pnlIns.TabIndex = 107;
-            // 
-            // SAGYO_CD
-            // 
-            this.SAGYO_CD.DataPropertyName = "SAGYO_CD";
-            this.SAGYO_CD.HeaderText = "MST_SAGYO_CD";
-            this.SAGYO_CD.Name = "SAGYO_CD";
-            this.SAGYO_CD.Visible = false;
-            // 
-            // SAGYO_NAME
-            // 
-            this.SAGYO_NAME.DataPropertyName = "SAGYO_NAME";
-            this.SAGYO_NAME.HeaderText = "";
-            this.SAGYO_NAME.Name = "SAGYO_NAME";
-            this.SAGYO_NAME.ReadOnly = true;
-            this.SAGYO_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.SAGYO_NAME.Width = 400;
-            // 
-            // PARENT_FLG
-            // 
-            this.PARENT_FLG.DataPropertyName = "PARENT_FLG";
-            this.PARENT_FLG.FalseValue = "false";
-            this.PARENT_FLG.HeaderText = "PARENT_FLG";
-            this.PARENT_FLG.Name = "PARENT_FLG";
-            this.PARENT_FLG.TrueValue = "true";
-            this.PARENT_FLG.Visible = false;
-            // 
-            // DISUSE_FLG
-            // 
-            this.DISUSE_FLG.DataPropertyName = "DISUSE_FLG";
-            this.DISUSE_FLG.FalseValue = "false";
-            this.DISUSE_FLG.HeaderText = "実施要否";
-            this.DISUSE_FLG.Name = "DISUSE_FLG";
-            this.DISUSE_FLG.TrueValue = "true";
-            // 
-            // DISUSE_FLG_OLD
-            // 
-            this.DISUSE_FLG_OLD.DataPropertyName = "DISUSE_FLG_OLD";
-            this.DISUSE_FLG_OLD.FalseValue = "false";
-            this.DISUSE_FLG_OLD.HeaderText = "DISUSE_FLG_OLD";
-            this.DISUSE_FLG_OLD.Name = "DISUSE_FLG_OLD";
-            this.DISUSE_FLG_OLD.TrueValue = "true";
-            this.DISUSE_FLG_OLD.Visible = false;
-            // 
-            // SAGYO_STATUS
-            // 
-            this.SAGYO_STATUS.DataPropertyName = "SAGYO_STATUS";
-            this.SAGYO_STATUS.HeaderText = "SAGYO_STATUS";
-            this.SAGYO_STATUS.Name = "SAGYO_STATUS";
-            this.SAGYO_STATUS.Visible = false;
-            // 
-            // STATUS_NAME
-            // 
-            this.STATUS_NAME.DataPropertyName = "STATUS_NAME";
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.STATUS_NAME.DefaultCellStyle = dataGridViewCellStyle2;
-            this.STATUS_NAME.HeaderText = "状況";
-            this.STATUS_NAME.Name = "STATUS_NAME";
-            this.STATUS_NAME.ReadOnly = true;
-            this.STATUS_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // SAGYO_USER
-            // 
-            this.SAGYO_USER.DataPropertyName = "SAGYO_USER";
-            this.SAGYO_USER.HeaderText = "SAGYO_USER";
-            this.SAGYO_USER.Name = "SAGYO_USER";
-            this.SAGYO_USER.Visible = false;
-            // 
-            // SAGYO_DATE
-            // 
-            this.SAGYO_DATE.DataPropertyName = "SAGYO_DATE";
-            this.SAGYO_DATE.HeaderText = "SAGYO_DATE";
-            this.SAGYO_DATE.Name = "SAGYO_DATE";
-            this.SAGYO_DATE.Visible = false;
             // 
             // GC0050
             // 

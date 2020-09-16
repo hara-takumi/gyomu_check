@@ -30,18 +30,28 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.btnNew = new System.Windows.Forms.Button();
             this.dgvIchiran = new System.Windows.Forms.DataGridView();
+            this.SAGYO_YYMM = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.GYOMU_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.GYOMU_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_STATUS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_STATUS_NM = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_LAST_DATE = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_LAST_USER_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SAGYO_LAST_USER = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnReturn = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -59,14 +69,6 @@
             this.dataGridViewButtonColumn2 = new System.Windows.Forms.DataGridViewButtonColumn();
             this.GYOMU_CHEACK = new System.Windows.Forms.DataGridViewButtonColumn();
             this.GYOMU_SYUSEI = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.SAGYO_YYMM = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.GYOMU_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.GYOMU_NAME = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_STATUS = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_STATUS_NM = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_LAST_DATE = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_LAST_USER_CD = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SAGYO_LAST_USER = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvIchiran)).BeginInit();
             this.SuspendLayout();
             // 
@@ -122,7 +124,7 @@
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvIchiran.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvIchiran.ColumnHeadersHeight = 40;
+            this.dgvIchiran.ColumnHeadersHeight = 30;
             this.dgvIchiran.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.dgvIchiran.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.GYOMU_CHEACK,
@@ -152,6 +154,78 @@
             this.dgvIchiran.Size = new System.Drawing.Size(1143, 439);
             this.dgvIchiran.TabIndex = 10;
             this.dgvIchiran.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvIchiran_CellContentClick);
+            // 
+            // SAGYO_YYMM
+            // 
+            this.SAGYO_YYMM.DataPropertyName = "SAGYO_YYMM";
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.SAGYO_YYMM.DefaultCellStyle = dataGridViewCellStyle4;
+            this.SAGYO_YYMM.HeaderText = "年月";
+            this.SAGYO_YYMM.Name = "SAGYO_YYMM";
+            this.SAGYO_YYMM.ReadOnly = true;
+            // 
+            // GYOMU_CD
+            // 
+            this.GYOMU_CD.DataPropertyName = "GYOMU_CD";
+            this.GYOMU_CD.HeaderText = "業務CD";
+            this.GYOMU_CD.Name = "GYOMU_CD";
+            this.GYOMU_CD.ReadOnly = true;
+            this.GYOMU_CD.Visible = false;
+            // 
+            // GYOMU_NAME
+            // 
+            this.GYOMU_NAME.DataPropertyName = "GYOMU_NAME";
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.GYOMU_NAME.DefaultCellStyle = dataGridViewCellStyle5;
+            this.GYOMU_NAME.HeaderText = "業務";
+            this.GYOMU_NAME.Name = "GYOMU_NAME";
+            this.GYOMU_NAME.ReadOnly = true;
+            this.GYOMU_NAME.Width = 150;
+            // 
+            // SAGYO_STATUS
+            // 
+            this.SAGYO_STATUS.DataPropertyName = "SAGYO_STATUS";
+            this.SAGYO_STATUS.HeaderText = "進捗CD";
+            this.SAGYO_STATUS.Name = "SAGYO_STATUS";
+            this.SAGYO_STATUS.ReadOnly = true;
+            this.SAGYO_STATUS.Visible = false;
+            // 
+            // SAGYO_STATUS_NM
+            // 
+            this.SAGYO_STATUS_NM.DataPropertyName = "SAGYO_STATUS_NM";
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.SAGYO_STATUS_NM.DefaultCellStyle = dataGridViewCellStyle6;
+            this.SAGYO_STATUS_NM.HeaderText = "進捗";
+            this.SAGYO_STATUS_NM.Name = "SAGYO_STATUS_NM";
+            this.SAGYO_STATUS_NM.ReadOnly = true;
+            // 
+            // SAGYO_LAST_DATE
+            // 
+            this.SAGYO_LAST_DATE.DataPropertyName = "SAGYO_LAST_DATE";
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.SAGYO_LAST_DATE.DefaultCellStyle = dataGridViewCellStyle7;
+            this.SAGYO_LAST_DATE.HeaderText = "最終使用日";
+            this.SAGYO_LAST_DATE.Name = "SAGYO_LAST_DATE";
+            this.SAGYO_LAST_DATE.ReadOnly = true;
+            this.SAGYO_LAST_DATE.Width = 120;
+            // 
+            // SAGYO_LAST_USER_CD
+            // 
+            this.SAGYO_LAST_USER_CD.DataPropertyName = "SAGYO_LAST_USER_CD";
+            this.SAGYO_LAST_USER_CD.HeaderText = "最終使用者CD";
+            this.SAGYO_LAST_USER_CD.Name = "SAGYO_LAST_USER_CD";
+            this.SAGYO_LAST_USER_CD.ReadOnly = true;
+            this.SAGYO_LAST_USER_CD.Visible = false;
+            this.SAGYO_LAST_USER_CD.Width = 120;
+            // 
+            // SAGYO_LAST_USER
+            // 
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.SAGYO_LAST_USER.DefaultCellStyle = dataGridViewCellStyle8;
+            this.SAGYO_LAST_USER.HeaderText = "最終使用者";
+            this.SAGYO_LAST_USER.Name = "SAGYO_LAST_USER";
+            this.SAGYO_LAST_USER.ReadOnly = true;
+            this.SAGYO_LAST_USER.Width = 120;
             // 
             // btnReturn
             // 
@@ -291,16 +365,28 @@
             // dataGridViewButtonColumn1
             // 
             this.dataGridViewButtonColumn1.DataPropertyName = "GYOMU_CHEACK";
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.dataGridViewButtonColumn1.DefaultCellStyle = dataGridViewCellStyle10;
+            this.dataGridViewButtonColumn1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.dataGridViewButtonColumn1.HeaderText = "";
             this.dataGridViewButtonColumn1.Name = "dataGridViewButtonColumn1";
+            this.dataGridViewButtonColumn1.ReadOnly = true;
             this.dataGridViewButtonColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewButtonColumn1.Width = 120;
             // 
             // dataGridViewButtonColumn2
             // 
             this.dataGridViewButtonColumn2.DataPropertyName = "GYOMU_SYUSEI";
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.dataGridViewButtonColumn2.DefaultCellStyle = dataGridViewCellStyle11;
+            this.dataGridViewButtonColumn2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.dataGridViewButtonColumn2.HeaderText = "";
             this.dataGridViewButtonColumn2.Name = "dataGridViewButtonColumn2";
+            this.dataGridViewButtonColumn2.ReadOnly = true;
             this.dataGridViewButtonColumn2.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewButtonColumn2.Width = 120;
             // 
             // GYOMU_CHEACK
             // 
@@ -327,78 +413,6 @@
             this.GYOMU_SYUSEI.ReadOnly = true;
             this.GYOMU_SYUSEI.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.GYOMU_SYUSEI.Width = 120;
-            // 
-            // SAGYO_YYMM
-            // 
-            this.SAGYO_YYMM.DataPropertyName = "SAGYO_YYMM";
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.SAGYO_YYMM.DefaultCellStyle = dataGridViewCellStyle4;
-            this.SAGYO_YYMM.HeaderText = "年月";
-            this.SAGYO_YYMM.Name = "SAGYO_YYMM";
-            this.SAGYO_YYMM.ReadOnly = true;
-            // 
-            // GYOMU_CD
-            // 
-            this.GYOMU_CD.DataPropertyName = "GYOMU_CD";
-            this.GYOMU_CD.HeaderText = "業務CD";
-            this.GYOMU_CD.Name = "GYOMU_CD";
-            this.GYOMU_CD.ReadOnly = true;
-            this.GYOMU_CD.Visible = false;
-            // 
-            // GYOMU_NAME
-            // 
-            this.GYOMU_NAME.DataPropertyName = "GYOMU_NAME";
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.GYOMU_NAME.DefaultCellStyle = dataGridViewCellStyle5;
-            this.GYOMU_NAME.HeaderText = "業務";
-            this.GYOMU_NAME.Name = "GYOMU_NAME";
-            this.GYOMU_NAME.ReadOnly = true;
-            this.GYOMU_NAME.Width = 150;
-            // 
-            // SAGYO_STATUS
-            // 
-            this.SAGYO_STATUS.DataPropertyName = "SAGYO_STATUS";
-            this.SAGYO_STATUS.HeaderText = "進捗CD";
-            this.SAGYO_STATUS.Name = "SAGYO_STATUS";
-            this.SAGYO_STATUS.ReadOnly = true;
-            this.SAGYO_STATUS.Visible = false;
-            // 
-            // SAGYO_STATUS_NM
-            // 
-            this.SAGYO_STATUS_NM.DataPropertyName = "SAGYO_STATUS_NM";
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.SAGYO_STATUS_NM.DefaultCellStyle = dataGridViewCellStyle6;
-            this.SAGYO_STATUS_NM.HeaderText = "進捗";
-            this.SAGYO_STATUS_NM.Name = "SAGYO_STATUS_NM";
-            this.SAGYO_STATUS_NM.ReadOnly = true;
-            // 
-            // SAGYO_LAST_DATE
-            // 
-            this.SAGYO_LAST_DATE.DataPropertyName = "SAGYO_LAST_DATE";
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.SAGYO_LAST_DATE.DefaultCellStyle = dataGridViewCellStyle7;
-            this.SAGYO_LAST_DATE.HeaderText = "最終使用日";
-            this.SAGYO_LAST_DATE.Name = "SAGYO_LAST_DATE";
-            this.SAGYO_LAST_DATE.ReadOnly = true;
-            this.SAGYO_LAST_DATE.Width = 120;
-            // 
-            // SAGYO_LAST_USER_CD
-            // 
-            this.SAGYO_LAST_USER_CD.DataPropertyName = "SAGYO_LAST_USER_CD";
-            this.SAGYO_LAST_USER_CD.HeaderText = "最終使用者CD";
-            this.SAGYO_LAST_USER_CD.Name = "SAGYO_LAST_USER_CD";
-            this.SAGYO_LAST_USER_CD.ReadOnly = true;
-            this.SAGYO_LAST_USER_CD.Visible = false;
-            this.SAGYO_LAST_USER_CD.Width = 120;
-            // 
-            // SAGYO_LAST_USER
-            // 
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("ＭＳ ゴシック", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.SAGYO_LAST_USER.DefaultCellStyle = dataGridViewCellStyle8;
-            this.SAGYO_LAST_USER.HeaderText = "最終使用者";
-            this.SAGYO_LAST_USER.Name = "SAGYO_LAST_USER";
-            this.SAGYO_LAST_USER.ReadOnly = true;
-            this.SAGYO_LAST_USER.Width = 120;
             // 
             // GC0030
             // 

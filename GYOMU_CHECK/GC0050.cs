@@ -10,6 +10,7 @@ namespace GYOMU_CHECK
 {
     public partial class GC0050 : Form
     {
+        #region メンバー変数
         private readonly User user;
         private readonly CommonUtil comU = new CommonUtil();
         public bool torokuFlg = false;
@@ -23,19 +24,20 @@ namespace GYOMU_CHECK
         string sagyoYYMM;
         private readonly string gyomuCd;
         private readonly string programId = "GC0050";
+        #endregion
+        //public enum column
+        //{
+        //    MST_SAGYO_CD,
+        //    MST_SAGYO_NAME,
+        //    MST_SAGYO_PARENT_FLG,
+        //    TRN_CHECK_B_DISUSE_FLG,
+        //    TRN_CHECK_B_DISUSE_FLG_OLD,
+        //    TRN_CHECK_B_SAGYO_STATUS,
+        //    STATUS_NAME,
+        //    TRN_CHECK_B_SAGYO_USER,
+        //    TRN_CHECK_B_SAGYO_DATE
+        //}
 
-        public enum column
-        {
-            MST_SAGYO_CD,
-            MST_SAGYO_NAME,
-            MST_SAGYO_PARENT_FLG,
-            TRN_CHECK_B_DISUSE_FLG,
-            TRN_CHECK_B_DISUSE_FLG_OLD,
-            TRN_CHECK_B_SAGYO_STATUS,
-            STATUS_NAME,
-            TRN_CHECK_B_SAGYO_USER,
-            TRN_CHECK_B_SAGYO_DATE
-        }
 
         public enum Mode
         {
@@ -43,7 +45,11 @@ namespace GYOMU_CHECK
             UPDATE
         }
 
-        
+        #region コンストラクタ
+        /// <summary>
+        /// コンストラクタ(新規)
+        /// </summary>
+        /// <param name="user"></param>
         public GC0050(User user)
         {
             this.user = user;
@@ -51,6 +57,13 @@ namespace GYOMU_CHECK
             InitializeComponent();
         }
 
+        /// <summary>
+        /// コンストラクタ(更新)
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="yyyyMM"></param>
+        /// <param name="Cd"></param>
+        /// <param name="state"></param>
         public GC0050(User user, string yyyyMM, string Cd, string state)
         {
             this.user = user;
@@ -60,7 +73,9 @@ namespace GYOMU_CHECK
             stateMode = state;
             InitializeComponent();
         }
+        #endregion
 
+        #region イベント
         /// <summary>
         /// 初期表示
         /// </summary>
@@ -117,6 +132,57 @@ namespace GYOMU_CHECK
         }
 
         /// <summary>
+        /// セルクリック時処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgvIchiran_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex == -1)
+            {
+                return;
+            }
+            DataGridView dgv = (DataGridView)sender;
+            if (dgv.Columns[e.ColumnIndex].Name == "TRN_CHECK_B_DISUSE_FLG")
+            {
+                //変更フラグ
+                changeFlg = true;
+            }
+        }
+
+        /// <summary>
+        /// 年変更処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbYear_SelectedValueChanged(object sender, EventArgs e)
+        {
+            headerChangeFlg = true;
+        }
+
+        /// <summary>
+        /// 月変更処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbMonth_SelectedValueChanged(object sender, EventArgs e)
+        {
+            headerChangeFlg = true;
+        }
+
+        /// <summary>
+        /// 業務コンボ変更時処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbKbn_SelectedValueChanged(object sender, EventArgs e)
+        {
+            headerChangeFlg = true;
+        }
+        #endregion
+
+        #region メソッド
+        /// <summary>
         /// 初期化
         /// </summary>
         public void Initialization()
@@ -148,6 +214,7 @@ namespace GYOMU_CHECK
                 cmbMonth.DataSource = comU.CMonth(false).ToArray();
                 cmbMonth.Text = dt.ToString("MM");
 
+                dgvIchiran.Columns["STATUS_NAME"].Visible = false;
                 btnDelete.Visible = false;
                 btnInsert.Enabled = false;
                 lblUpd.Visible = false;
@@ -250,48 +317,6 @@ namespace GYOMU_CHECK
             command.Connection.Close();
         }
 
-
-        /// <summary>
-        /// 戻るボタン
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnReturn_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        /// <summary>
-        /// 作成ボタン
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnCreate_Click(object sender, EventArgs e)
-        {
-            sagyoYYMM = cmbYear.SelectedValue.ToString() + cmbMonth.SelectedValue.ToString();
-            //業務の作成チェック
-            if (!SearchGyomu())
-            {
-                return;
-            }
-            if (dgvIchiran.RowCount != 0)
-            {
-                if (changeFlg)
-                {
-                    DialogResult result = MessageBox.Show("内容が変更されています。　変更は破棄されますが、よろしいですか？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-                    //何が選択されたか調べる
-                    if (result == DialogResult.No)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            Clear();
-            //新規一覧表示
-            DisplyInsert();
-        }
-
         /// <summary>
         /// 業務検索
         /// </summary>
@@ -358,8 +383,6 @@ namespace GYOMU_CHECK
             //実施要否チェックボックス作成
             DataGridViewCheckBoxColumn dgvcbc = new DataGridViewCheckBoxColumn();
             dgvcbc.Name = "実施要否";
-
-            dgvIchiran.Columns["STATUS_NAME"].Visible = false;
 
             //一覧に検索結果を表示
             dgvIchiran.Rows.Clear();
@@ -594,7 +617,7 @@ namespace GYOMU_CHECK
         }
 
         /// <summary>
-        /// クリアボタン
+        /// クリア処理
         /// </summary>
         private void Clear()
         {
@@ -603,52 +626,6 @@ namespace GYOMU_CHECK
                 //dgvIchiran.DataSource = null;
                 dgvIchiran.Rows.Clear();
                 //dgvIchiran.Columns.Clear();
-            }
-        }
-
-        /// <summary>
-        /// セルクリック時処理
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dgvIchiran_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex == -1)
-            {
-                return;
-            }
-            DataGridView dgv = (DataGridView)sender;
-            if (dgv.Columns[e.ColumnIndex].Name == "TRN_CHECK_B_DISUSE_FLG")
-            {
-                //変更フラグ
-                changeFlg = true;
-            }
-        }
-
-        /// <summary>
-        /// 登録ボタン
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnInsert_Click(object sender, EventArgs e)
-        {
-            //新規の場合
-            if (gamenMode == "INSERT")
-            {
-                if (headerChangeFlg)
-                {
-                    MessageBox.Show("ヘッダーの値が変更されています。\n\r一覧の再表示を行ってください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                else
-                {
-                    //登録処理
-                    Toroku();
-                }
-            }
-            else
-            {
-                //更新処理
-                UpdateGyomu();
             }
         }
 
@@ -797,118 +774,201 @@ namespace GYOMU_CHECK
         /// <returns></returns>
         private bool CheckUpdateGyomuHeader()
         {
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                //親項目の場合スキップ
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            bool returnFlg = true;
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx]).ToList()
+                .ForEach(row => 
                 {
-                    continue;
-                }
-                //実施する
-                if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value)
-                {
-                    //未実施の場合
-                    if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "0")
+                    //親項目の場合スキップ
+                    if ((bool)row.Cells["PARENT_FLG"].Value) return;
+
+                    //実施する
+                    if ((bool)row.Cells["DISUSE_FLG"].Value)
                     {
-                        //完了状態から実施する業務を追加する/場合
-                        if (stateMode == "2")
+                        //未実施の場合
+                        if (row.Cells["SAGYO_STATUS"].Value.ToString() == "0")
+                        {
+                            //完了状態から実施する業務を追加する場合
+                            if (stateMode == "2")
+                            {
+                                sagyoState = "1";
+                                returnFlg = true;
+                                return;
+                            }
+                            returnFlg = false;
+                            return;
+                        }
+                        //処理中の場合
+                        else if (row.Cells["SAGYO_STATUS"].Value.ToString() == "1")
                         {
                             sagyoState = "1";
-                            return true;
+                            returnFlg = true;
+                            return;
                         }
-                        return false;
-                    }
-                    //処理中の場合
-                    else if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "1")
-                    {
-                        sagyoState = "1";
-                        return true;
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
-                        continue;
+                        return;
                     }
-                }
-                else
-                {
-                    continue;
-                }
+                });
 
-            }
             //すべてが完了済み、または実施不要
             sagyoState = "2";
-            return true;
+            return returnFlg;
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    //親項目の場合スキップ
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    //実施する
+            //    if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value)
+            //    {
+            //        //未実施の場合
+            //        if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "0")
+            //        {
+            //            //完了状態から実施する業務を追加する/場合
+            //            if (stateMode == "2")
+            //            {
+            //                sagyoState = "1";
+            //                return true;
+            //            }
+            //            return false;
+            //        }
+            //        //処理中の場合
+            //        else if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value == "1")
+            //        {
+            //            sagyoState = "1";
+            //            return true;
+            //        }
+            //        else
+            //        {
+            //            continue;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        continue;
+            //    }
+
+            //}
+            //すべてが完了済み、または実施不要
+            //sagyoState = "2";
+            //return true;
         }
 
-
+        /// <summary>
+        /// CHEAK_Bテーブル更新処理
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool UpdateGyomuCheckBody(MySqlTransaction transaction)
         {
-            bool flg = true;
+            bool returnFlg = true;
 
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                //親項目の場合スキップ
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx]).ToList()
+                .ForEach(row => 
                 {
-                    continue;
-                }
-                ///変更のあった行のみを対象
-                if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value)
-                {
-                    if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
+                    //親項目の場合スキップ
+                    if ((bool)row.Cells["PARENT_FLG"].Value) return;
+
+                    //変更のあった行のみを対象
+                    if (row.Cells["DISUSE_FLG"].Value == row.Cells["DISUSE_FLG_OLD"].Value) return;
+
+                    StringBuilder sql = new StringBuilder();
+                    sql.Append(" UPDATE TRN_CHECK_B ");
+                    sql.Append($"    SET  DISUSE_FLG = {row.Cells["DISUSE_FLG"].Value}");
+                    sql.Append("     ,    UPD_DT = now() ");
+                    sql.Append($"    ,    UPD_USER = {user.Id}  ");
+                    sql.Append($"    ,    UPD_PGM = {comU.CAddQuotation(programId)}  ");
+                    sql.Append($" WHERE GYOMU_CD = {gyomuCd}");
+                    sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
+                    sql.Append($" AND SAGYO_CD = {row.Cells["SAGYO_CD"].Value}");
+
+                    if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
                     {
-                        continue;
+                        returnFlg = false;
+                        return;
                     }
-                }
-                else
-                {
-                    if (!(bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
-                    {
-                        continue;
-                    }
-                }
-                StringBuilder sql = new StringBuilder();
-                sql.Append(" UPDATE TRN_CHECK_B ");
-                sql.Append($"    SET  DISUSE_FLG = {dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value}");
-                sql.Append("     ,    UPD_DT = now() ");
-                sql.Append($"    ,    UPD_USER = {user.Id}  ");
-                sql.Append($"    ,    UPD_PGM = {comU.CAddQuotation(programId)}  ");
-                sql.Append($" WHERE GYOMU_CD = {gyomuCd}");
-                sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
-                sql.Append($" AND SAGYO_CD = {dgvIchiran[(int)column.MST_SAGYO_CD, i].Value}");
+                });
+            return returnFlg;
 
-                if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
-                {
-                    flg = false;
-                    break;
-                }
-            }
+            //bool flg = true;
 
-            return flg;
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    //親項目の場合スキップ
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    ///変更のあった行のみを対象
+            //    if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value)
+            //    {
+            //        if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
+            //        {
+            //            continue;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (!(bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
+            //        {
+            //            continue;
+            //        }
+            //    }
+            //    StringBuilder sql = new StringBuilder();
+            //    sql.Append(" UPDATE TRN_CHECK_B ");
+            //    sql.Append($"    SET  DISUSE_FLG = {dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value}");
+            //    sql.Append("     ,    UPD_DT = now() ");
+            //    sql.Append($"    ,    UPD_USER = {user.Id}  ");
+            //    sql.Append($"    ,    UPD_PGM = {comU.CAddQuotation(programId)}  ");
+            //    sql.Append($" WHERE GYOMU_CD = {gyomuCd}");
+            //    sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
+            //    sql.Append($" AND SAGYO_CD = {dgvIchiran[(int)column.MST_SAGYO_CD, i].Value}");
+
+            //    if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
+            //    {
+            //        flg = false;
+            //        break;
+            //    }
+            //}
+
+            //return flg;
         }
 
+        /// <summary>
+        /// 登録ダイアログ表示
+        /// </summary>
         private void Toroku()
         {
-            if (!CheckToroku())
-            {
-                return;
-            }
+            //登録チェック
+            if (!CheckToroku()) return;
+
             DialogResult result = MessageBox.Show("登録を行います。よろしいでしょうか。？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 
             //何が選択されたか調べる
             if (result == DialogResult.Yes)
             {
                 MySqlTransaction transaction = null;
-                if (!comU.CConnect(ref transaction, ref command))
-                {
-                    return;
-                }
+                //データベース接続
+                if (!comU.CConnect(ref transaction, ref command)) return;
+
+                //業務チェックヘッダテーブルに登録
                 if (!InsertGyomuCheckHeader(transaction))
                 {
-
                     MessageBox.Show("業務チェックヘッダの作成に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+
+                //業務チェック明細テーブルに登録
                 if (!InsertGyomuCheckBody(transaction))
                 {
                     MessageBox.Show("業務チェック明細の作成に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -917,26 +977,58 @@ namespace GYOMU_CHECK
                 transaction.Commit();
                 MessageBox.Show("登録が完了しました。", "");
                 torokuFlg = true;
-                this.Close();
+                Close();
             }
         }
+
+        /// <summary>
+        /// 登録時に実施要否に変更があったか確認
+        /// </summary>
+        /// <returns></returns>
         private bool CheckToroku()
         {
-            for (int i = 0; i < dgvIchiran.RowCount; i++)
-            {
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
-                {
-                    continue;
-                }
+            bool returnFlg = false;
 
-                if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value)
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count).Select(indx => dgvIchiran.Rows[indx])
+                .Where(row => (bool)row.Cells["PARENT_FLG"].Value).ToList()
+                .ForEach(row => 
                 {
-                    return true;
-                }
+                    //実施要否にチェックがある場合
+                    if ((bool)row.Cells["DISUSE_FLG"].Value)
+                    {
+                        returnFlg = true;
+                    }
+                });
+            //実施要否に１つもチェックがない場合
+            if(returnFlg == false)
+            {
+                MessageBox.Show("実施要否は1つ以上選択してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            MessageBox.Show("実施要否は1つ以上選択してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return false;
+            
+            return returnFlg;
+
+            //for (int i = 0; i < dgvIchiran.RowCount; i++)
+            //{
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+
+            //    if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value)
+            //    {
+            //        return true;
+            //    }
+            //}
+            //MessageBox.Show("実施要否は1つ以上選択してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //return false;
         }
+
+        /// <summary>
+        /// CHEAK_Hテーブルに登録
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool InsertGyomuCheckHeader(MySqlTransaction transaction)
         {
             StringBuilder sql = new StringBuilder();
@@ -968,98 +1060,115 @@ namespace GYOMU_CHECK
             return true;
         }
 
+        /// <summary>
+        /// CHEAK_Bテーブルに登録
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool InsertGyomuCheckBody(MySqlTransaction transaction)
         {
-            bool flg = true;
+            bool returnFlg = true;
 
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                StringBuilder sql = new StringBuilder();
-                sql.Append(" INSERT INTO TRN_CHECK_B ");
-                sql.Append("    (GYOMU_CD ");
-                sql.Append("    ,SAGYO_YYMM ");
-                sql.Append("    ,SAGYO_CD ");
-                sql.Append("    ,SAGYO_STATUS ");
-                sql.Append("    ,DISUSE_FLG ");
-                sql.Append("    ,INS_DT ");
-                sql.Append("    ,INS_USER ");
-                sql.Append("    ,INS_PGM ");
-                sql.Append("    ,UPD_DT ");
-                sql.Append("    ,UPD_USER ");
-                sql.Append("    ,UPD_PGM) ");
-                sql.Append(" VALUES ");
-                sql.Append($"    ({comU.CAddQuotation(cmbKbn.SelectedValue.ToString())} ");
-                sql.Append($"    ,{sagyoYYMM} ");
-                sql.Append($"    ,{comU.CAddQuotation(dgvIchiran.Rows[i].Cells[(int)column.MST_SAGYO_CD].Value.ToString())} ");
-                sql.Append("    ,0 ");
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx]).ToList()
+                .ForEach(row => 
                 {
-                    sql.Append("    ,false ");
-                }
-                else
-                {
-                    sql.Append($"    ,{dgvIchiran.Rows[i].Cells[(int)column.TRN_CHECK_B_DISUSE_FLG].Value} ");
-                }
-                sql.Append("    ,now() ");
-                sql.Append($"    ,{user.Id} ");
-                sql.Append($"    ,{comU.CAddQuotation(programId)} ");
-                sql.Append("    ,now() ");
-                sql.Append($"    ,{user.Id} ");
-                sql.Append($"    ,{comU.CAddQuotation(programId)}) ");
-
-                if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
-                {
-                    flg = false;
-                    break;
-                }
-            }
-
-            return flg;
-        }
-
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            MySqlTransaction transaction = null;
-            DialogResult result = MessageBox.Show("削除を行います。よろしいでしょうか。？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-
-            //何が選択されたか調べる
-            if (result == DialogResult.Yes)
-            {
-                if (CheckSagyoStart())
-                {
-                    DialogResult dialogResult = MessageBox.Show("作業開始済みの作業が含まれます。よろしいでしょうか。？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-                    //何が選択されたか調べる
-                    if (dialogResult == DialogResult.No)
+                    StringBuilder sql = new StringBuilder();
+                    sql.Append(" INSERT INTO TRN_CHECK_B ");
+                    sql.Append("    (GYOMU_CD ");
+                    sql.Append("    ,SAGYO_YYMM ");
+                    sql.Append("    ,SAGYO_CD ");
+                    sql.Append("    ,SAGYO_STATUS ");
+                    sql.Append("    ,DISUSE_FLG ");
+                    sql.Append("    ,INS_DT ");
+                    sql.Append("    ,INS_USER ");
+                    sql.Append("    ,INS_PGM ");
+                    sql.Append("    ,UPD_DT ");
+                    sql.Append("    ,UPD_USER ");
+                    sql.Append("    ,UPD_PGM) ");
+                    sql.Append(" VALUES ");
+                    sql.Append($"    ({comU.CAddQuotation(cmbKbn.SelectedValue.ToString())} ");
+                    sql.Append($"    ,{sagyoYYMM} ");
+                    sql.Append($"    ,{comU.CAddQuotation(row.Cells["SAGYO_CD"].Value.ToString())} ");
+                    sql.Append("    ,0 ");
+                    //親項目の場合
+                    if ((bool)row.Cells["PARENT_FLG"].Value)
                     {
+                        sql.Append("    ,false ");
+                    }
+                    else
+                    {
+                        sql.Append($"    ,{row.Cells["DISUSE_FLG"].Value} ");
+                    }
+                    sql.Append("    ,now() ");
+                    sql.Append($"    ,{user.Id} ");
+                    sql.Append($"    ,{comU.CAddQuotation(programId)} ");
+                    sql.Append("    ,now() ");
+                    sql.Append($"    ,{user.Id} ");
+                    sql.Append($"    ,{comU.CAddQuotation(programId)}) ");
+
+                    if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
+                    {
+                        returnFlg = false;
                         return;
                     }
-                }
-                if (!comU.CConnect(ref transaction, ref command))
-                {
-                    return;
-                }
-                if (!DeleteGyomuCheckHeader(transaction))
-                {
-                    MessageBox.Show("業務チェックヘッダの削除に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                if (!DelteGyomuCheckBody(transaction))
-                {
-                    MessageBox.Show("業務チェック明細の削除に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                transaction.Commit();
-                if (gamenMode == "UPDATE")
-                {
-                    DeleteHaita();
-                }
-                torokuFlg = true;
+                });
 
-                MessageBox.Show("削除が完了しました。", "");
-                this.Close();
-            }
+            return returnFlg;
+
+
+            //bool flg = true;
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    StringBuilder sql = new StringBuilder();
+            //    sql.Append(" INSERT INTO TRN_CHECK_B ");
+            //    sql.Append("    (GYOMU_CD ");
+            //    sql.Append("    ,SAGYO_YYMM ");
+            //    sql.Append("    ,SAGYO_CD ");
+            //    sql.Append("    ,SAGYO_STATUS ");
+            //    sql.Append("    ,DISUSE_FLG ");
+            //    sql.Append("    ,INS_DT ");
+            //    sql.Append("    ,INS_USER ");
+            //    sql.Append("    ,INS_PGM ");
+            //    sql.Append("    ,UPD_DT ");
+            //    sql.Append("    ,UPD_USER ");
+            //    sql.Append("    ,UPD_PGM) ");
+            //    sql.Append(" VALUES ");
+            //    sql.Append($"    ({comU.CAddQuotation(cmbKbn.SelectedValue.ToString())} ");
+            //    sql.Append($"    ,{sagyoYYMM} ");
+            //    sql.Append($"    ,{comU.CAddQuotation(dgvIchiran.Rows[i].Cells[(int)column.MST_SAGYO_CD].Value.ToString())} ");
+            //    sql.Append("    ,0 ");
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        sql.Append("    ,false ");
+            //    }
+            //    else
+            //    {
+            //        sql.Append($"    ,{dgvIchiran.Rows[i].Cells[(int)column.TRN_CHECK_B_DISUSE_FLG].Value} ");
+            //    }
+            //    sql.Append("    ,now() ");
+            //    sql.Append($"    ,{user.Id} ");
+            //    sql.Append($"    ,{comU.CAddQuotation(programId)} ");
+            //    sql.Append("    ,now() ");
+            //    sql.Append($"    ,{user.Id} ");
+            //    sql.Append($"    ,{comU.CAddQuotation(programId)}) ");
+
+            //    if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
+            //    {
+            //        flg = false;
+            //        break;
+            //    }
+            //}
+
+            //return flg;
         }
 
+        /// <summary>
+        /// CHEAK_Hの削除処理
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool DeleteGyomuCheckHeader(MySqlTransaction transaction)
         {
             StringBuilder sql = new StringBuilder();
@@ -1074,26 +1183,57 @@ namespace GYOMU_CHECK
             return true;
         }
 
+        /// <summary>
+        /// CHEAK_Bの削除処理
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
         private bool DelteGyomuCheckBody(MySqlTransaction transaction)
         {
-            bool flg = true;
+            bool returnFlg = true;
 
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                StringBuilder sql = new StringBuilder();
-                sql.Append(" DELETE FROM TRN_CHECK_B ");
-                sql.Append($" WHERE GYOMU_CD = {gyomuCd}");
-                sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
-
-                if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).ToList()
+                .ForEach(row => 
                 {
-                    flg = false;
-                    break;
-                }
-            }
+                    StringBuilder sql = new StringBuilder();
+                    sql.Append(" DELETE FROM TRN_CHECK_B ");
+                    sql.Append($" WHERE GYOMU_CD = {gyomuCd}");
+                    sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
 
-            return flg;
+                    if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
+                    {
+                        returnFlg = false;
+                        return;
+                    }
+                });
+
+            return returnFlg;
+
+
+            //bool flg = true;
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    StringBuilder sql = new StringBuilder();
+            //    sql.Append(" DELETE FROM TRN_CHECK_B ");
+            //    sql.Append($" WHERE GYOMU_CD = {gyomuCd}");
+            //    sql.Append($" AND SAGYO_YYMM = {sagyoYYMM}");
+
+            //    if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
+            //    {
+            //        flg = false;
+            //        break;
+            //    }
+            //}
+
+            //return flg;
         }
+
+        /// <summary>
+        /// 変更が行われていないか確認
+        /// </summary>
+        /// <returns></returns>
         private bool ChangeDetection()
         {
             //新規の場合
@@ -1101,53 +1241,205 @@ namespace GYOMU_CHECK
             {
                 return changeFlg;
             }
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
-            {
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+
+            bool returnFlg = false;
+
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx]).ToList()
+                .ForEach(row => 
                 {
-                    continue;
-                }
-                if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value & !(bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
-                {
-                    return true;
-                }
-                if (!(bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value & (bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
-                {
-                    return true;
-                }
-            }
-            return false;
+                    //親項目の場合
+                    if ((bool)row.Cells["PARENT_FLG"].Value)
+                    {
+                        return;
+                    }
+                    //変更項目がある場合
+                    if ((bool)row.Cells["DISUSE_FLG"].Value != (bool)row.Cells["DISUSE_FLG_OLD"].Value)
+                    {
+                        returnFlg = true;
+                    }
+                });
+
+            return returnFlg;
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    if ((bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value & !(bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
+            //    {
+            //        return true;
+            //    }
+            //    if (!(bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG, i].Value & (bool)dgvIchiran[(int)column.TRN_CHECK_B_DISUSE_FLG_OLD, i].Value)
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
         }
 
+        /// <summary>
+        /// 未処理項目のみか確認
+        /// </summary>
+        /// <returns></returns>
         private bool CheckSagyoStart()
         {
-            for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            bool returnFlg = false;
+
+            dgvIchiran.Rows.Clear();
+            Enumerable.Range(0, dgvIchiran.Rows.Count - 1).Select(indx => dgvIchiran.Rows[indx]).ToList()
+                .ForEach(row =>
+                {
+                    //親項目の場合
+                    if ((bool)row.Cells["PARENT_FLG"].Value)
+                    {
+                        return;
+                    }
+                    //変更項目がある場合
+                    if (row.Cells["SAGYO_STATUS"].Value.ToString() != "0")
+                    {
+                        returnFlg = true;
+                    }
+                });
+
+            return returnFlg;
+
+            //for (int i = 0; i <= dgvIchiran.Rows.Count - 1; i++)
+            //{
+            //    if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+            //    {
+            //        continue;
+            //    }
+            //    else if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value != "0")
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
+        }
+        #endregion
+
+        #region ボタンイベント
+        /// <summary>
+        /// 戻るボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnReturn_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// 作成ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            sagyoYYMM = cmbYear.SelectedValue.ToString() + cmbMonth.SelectedValue.ToString();
+            //業務の作成チェック
+            if (!SearchGyomu())
             {
-                if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, i].Value)
+                return;
+            }
+            if (dgvIchiran.RowCount != 0)
+            {
+                if (changeFlg)
                 {
-                    continue;
-                }
-                else if ((string)dgvIchiran[(int)column.TRN_CHECK_B_SAGYO_STATUS, i].Value != "0")
-                {
-                    return true;
+                    DialogResult result = MessageBox.Show("内容が変更されています。　変更は破棄されますが、よろしいですか？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                    //何が選択されたか調べる
+                    if (result == DialogResult.No)
+                    {
+                        return;
+                    }
                 }
             }
-            return false;
+
+            Clear();
+            //新規一覧表示
+            DisplyInsert();
         }
 
-        private void cmbYear_SelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// 登録ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnInsert_Click(object sender, EventArgs e)
         {
-            headerChangeFlg = true;
+            //新規の場合
+            if (gamenMode == "INSERT")
+            {
+                if (headerChangeFlg)
+                {
+                    MessageBox.Show("ヘッダーの値が変更されています。\n\r一覧の再表示を行ってください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    //登録処理
+                    Toroku();
+                }
+            }
+            else
+            {
+                //更新処理
+                UpdateGyomu();
+            }
         }
 
-        private void cmbMonth_SelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// 削除ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnDelete_Click(object sender, EventArgs e)
         {
-            headerChangeFlg = true;
-        }
+            MySqlTransaction transaction = null;
+            DialogResult result = MessageBox.Show("削除を行います。よろしいでしょうか。？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 
-        private void cmbKbn_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            headerChangeFlg = true;
+            //何が選択されたか調べる
+            if (result == DialogResult.Yes)
+            {
+                //未処理以外の項目がある場合
+                if (CheckSagyoStart())
+                {
+                    DialogResult dialogResult = MessageBox.Show("作業開始済みの作業が含まれます。よろしいでしょうか。？", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                    //何が選択されたか調べる
+                    if (dialogResult == DialogResult.No) return;
+                }
+
+                //データベースに接続
+                if (!comU.CConnect(ref transaction, ref command)) return;
+
+                //業務チェックヘッダの削除に失敗した場合
+                if (!DeleteGyomuCheckHeader(transaction))
+                {
+                    MessageBox.Show("業務チェックヘッダの削除に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                //業務チェック明細の削除に失敗した場合
+                if (!DelteGyomuCheckBody(transaction))
+                {
+                    MessageBox.Show("業務チェック明細の削除に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                transaction.Commit();
+                //更新で遷移した場合
+                if (gamenMode == "UPDATE")
+                {
+                    //排他削除
+                    DeleteHaita();
+                }
+                torokuFlg = true;
+
+                MessageBox.Show("削除が完了しました。", "");
+                Close();
+            }
         }
+        #endregion
     }
 }
