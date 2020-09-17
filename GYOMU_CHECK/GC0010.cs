@@ -85,68 +85,89 @@ namespace GYOMU_CHECK
                     return;
                 }
                 //取得データが0件以上の場合
-                if (ds.Tables[0].Rows.Count != 0)
+                if (ds.Tables[0].Rows.Count == 0)
                 {
-                    string id = "";
-                    string name = "";
-                    string kengen = "";
-                    string hash = comU.GetHashedPassword(txtPw.Text);
-                    Enumerable.Range(0, ds.Tables[0].Rows.Count).Select(idx => ds.Tables[0].Rows[idx] as DataRow)
-                        .Where(dr => dr["MST_SHAIN_CODE"].ToString().Equals(txtUserCd.Text) 
-                        && dr["MST_SHAINPW_PASSWORD"].ToString().Equals(hash)).ToList()
-                        .ForEach(dr =>
-                        {
-                            id = dr["MST_SHAIN_CODE"].ToString();
-                            name = dr["MST_SHAIN_NAME"].ToString();
-                            kengen = dr["MST_SHAIN_SHOZOKU_CD"].ToString();
-                        });
-                    User user = new User(id, name, kengen);
-
-                    MySqlTransaction transaction = null;
-                    //データベースに接続できない場合
-                    if (!comU.CConnect(ref transaction, ref command)) return;
-
-                    //排他テーブルの削除に失敗した場合
-                    if (!comU.DeleteHaitaUser(transaction, ref command, id)) return;
-
-                    transaction.Commit();
-
-                    GC0020 frm = new GC0020(user);
-                    frm.Show();
-                    Hide();
+                    MessageBox.Show("ユーザーCDまたはパスワードが正しくありません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
-
-                    //for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
-                    //{
-                    //    //string hash = comU.GetHashedPassword(txtPw.Text);
-                    //    if (ds.Tables[0].Rows[i]["MST_SHAINPW_PASSWORD"].ToString().Equals(hash))
-                    //    {
-                    //        string id = ds.Tables[0].Rows[i]["MST_SHAIN_CODE"].ToString();
-                    //        string name = ds.Tables[0].Rows[i]["MST_SHAIN_NAME"].ToString();
-                    //        string kengen = ds.Tables[0].Rows[i]["MST_SHAIN_SHOZOKU_CD"].ToString();
-                    //        User user = new User(id, name, kengen);
-
-                    //        MySqlTransaction transaction = null;
-                    //        if (!comU.CConnect(ref transaction, ref command))
-                    //        {
-                    //            return;
-                    //        }
-                    //        if (!comU.DeleteHaitaUser(transaction, ref command, id))
-                    //        {
-
-                    //            return;
-                    //        }
-                    //        transaction.Commit();
-
-                    //        GC0020 frm = new GC0020(user);
-                    //        frm.Show();
-                    //        this.Hide();
-                    //        return;
-                    //    }
-                    //}
-
                 }
-                MessageBox.Show("ユーザーCDまたはパスワードが正しくありません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                string hash = comU.GetHashedPassword(txtPw.Text);
+                Enumerable.Range(0, ds.Tables[0].Rows.Count).Select(idx => ds.Tables[0].Rows[idx] as DataRow)
+                    .Where(dr => dr["MST_SHAIN_CODE"].ToString().Equals(txtUserCd.Text)).ToList()
+                    .ForEach(dr =>
+                    {
+                        //パスワードが一致している場合
+                        if (dr["MST_SHAINPW_PASSWORD"].ToString().Equals(hash))
+                        {
+                            string id = dr["MST_SHAIN_CODE"].ToString();
+                            string name = dr["MST_SHAIN_NAME"].ToString();
+                            string kengen = dr["MST_SHAIN_SHOZOKU_CD"].ToString();
+
+                            User user = new User(id, name, kengen);
+
+                            MySqlTransaction transaction = null;
+                            //データベースに接続できない場合
+                            if (!comU.CConnect(ref transaction, ref command)) return;
+
+                            //排他テーブルの削除に失敗した場合
+                            if (!comU.DeleteHaitaUser(transaction, ref command, id)) return;
+
+                            transaction.Commit();
+
+                            GC0020 frm = new GC0020(user);
+                            frm.Show();
+                            Hide();
+                        }
+                        else
+                        {
+                            MessageBox.Show("ユーザーCDまたはパスワードが正しくありません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    });
+                //User user = new User(id, name, kengen);
+
+                //MySqlTransaction transaction = null;
+                ////データベースに接続できない場合
+                //if (!comU.CConnect(ref transaction, ref command)) return;
+
+                ////排他テーブルの削除に失敗した場合
+                //if (!comU.DeleteHaitaUser(transaction, ref command, id)) return;
+
+                //transaction.Commit();
+
+                //GC0020 frm = new GC0020(user);
+                //frm.Show();
+                //Hide();
+                //return;
+
+                //for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                //{
+                //    //string hash = comU.GetHashedPassword(txtPw.Text);
+                //    if (ds.Tables[0].Rows[i]["MST_SHAINPW_PASSWORD"].ToString().Equals(hash))
+                //    {
+                //        string id = ds.Tables[0].Rows[i]["MST_SHAIN_CODE"].ToString();
+                //        string name = ds.Tables[0].Rows[i]["MST_SHAIN_NAME"].ToString();
+                //        string kengen = ds.Tables[0].Rows[i]["MST_SHAIN_SHOZOKU_CD"].ToString();
+                //        User user = new User(id, name, kengen);
+
+                //        MySqlTransaction transaction = null;
+                //        if (!comU.CConnect(ref transaction, ref command))
+                //        {
+                //            return;
+                //        }
+                //        if (!comU.DeleteHaitaUser(transaction, ref command, id))
+                //        {
+
+                //            return;
+                //        }
+                //        transaction.Commit();
+
+                //        GC0020 frm = new GC0020(user);
+                //        frm.Show();
+                //        this.Hide();
+                //        return;
+                //    }
+                //}
             }
         }
         #endregion

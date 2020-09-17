@@ -24,7 +24,6 @@ namespace GYOMU_CHECK
         {
             this.user = user;
             InitializeComponent();
-
         }
         #endregion
 

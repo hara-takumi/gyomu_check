@@ -133,7 +133,7 @@ namespace GYOMU_CHECK
 
             //if ((bool)dgvIchiran[(int)column.MST_SAGYO_PARENT_FLG, e.RowIndex].Value) return;
 
-            String status = dgv.Rows[e.RowIndex].Cells["SAGYO_STATUS"].Value.ToString();
+            String sagyoStatus = dgv.Rows[e.RowIndex].Cells["SAGYO_STATUS"].Value.ToString();
             String sagyoNm = dgv.Rows[e.RowIndex].Cells["SAGYO_NAME"].Value.ToString();
             //開始押下
             if (dgv.Columns[e.ColumnIndex].Name == "START_BUTTON")
@@ -145,7 +145,7 @@ namespace GYOMU_CHECK
                     return;
                 }
 
-                GC0060 Gc0060 = new GC0060(status, sagyoNm, gyomuNm, sagyoYYMM);
+                GC0060 Gc0060 = new GC0060(sagyoStatus, sagyoNm, gyomuNm, sagyoYYMM);
                 Gc0060.ShowDialog();
                 if (Gc0060.returnFlg)
                 {
@@ -179,7 +179,7 @@ namespace GYOMU_CHECK
                     return;
                 }
                 DateTime sagyoStart = DateTime.Parse(dgv.Rows[e.RowIndex].Cells["SAGYO_START_DATE"].Value.ToString());
-                GC0060 Gc0060 = new GC0060(status, sagyoNm, gyomuNm, sagyoYYMM, sagyoStart, false);
+                GC0060 Gc0060 = new GC0060(sagyoStatus, sagyoNm, gyomuNm, sagyoYYMM, sagyoStart, false);
                 Gc0060.ShowDialog();
                 if (Gc0060.returnFlg)
                 {
@@ -214,14 +214,14 @@ namespace GYOMU_CHECK
                 //進捗が進行中の場合
                 if (dgv.Rows[e.RowIndex].Cells["SAGYO_STATUS"].Value.ToString() == "1")
                 {
-                    Gc0060 = new GC0060(status, sagyoNm, gyomuNm, sagyoYYMM, sagyoStart, true);
+                    Gc0060 = new GC0060(sagyoStatus, sagyoNm, gyomuNm, sagyoYYMM, sagyoStart, true);
                 }
                 //進捗が完了の場合
                 else if (dgv.Rows[e.RowIndex].Cells["SAGYO_STATUS"].Value.ToString() == "2")
                 {
                     DateTime sagyoEnd = DateTime.Parse(dgv.Rows[e.RowIndex].Cells["SAGYO_END_DATE"].Value.ToString());
 
-                    Gc0060 = new GC0060(status, sagyoNm, gyomuNm, sagyoYYMM, sagyoStart, sagyoEnd);
+                    Gc0060 = new GC0060(sagyoStatus, sagyoNm, gyomuNm, sagyoYYMM, sagyoStart, sagyoEnd);
                 }
                 Gc0060.ShowDialog();
 
@@ -230,7 +230,7 @@ namespace GYOMU_CHECK
                     DataGridViewDisableButtonCell startButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[e.RowIndex].Cells["START_BUTTON"];
                     DataGridViewDisableButtonCell endButtonCell = (DataGridViewDisableButtonCell)dgvIchiran.Rows[e.RowIndex].Cells["END_BUTTON"];
                     //未実施の場合
-                    if (Gc0060.mStatus == "0")
+                    if (Gc0060.mSsagyoStatu == "0")
                     {
                         dgvIchiran.Rows[e.RowIndex].Cells["STATUS_NAME"].Value = "未着手";
                         dgvIchiran.Rows[e.RowIndex].Cells["SAGYO_STATUS"].Value = "0";
@@ -255,7 +255,7 @@ namespace GYOMU_CHECK
                         collectButtonCell.Enabled = false;
                     }
                     //処理中の場合
-                    else if (Gc0060.mStatus == "1")
+                    else if (Gc0060.mSsagyoStatu == "1")
                     {
                         dgvIchiran.Rows[e.RowIndex].Cells["SAGYO_STATUS"].Value = "1";
                         dgvIchiran.Rows[e.RowIndex].Cells["STATUS_NAME"].Value = "処理中";

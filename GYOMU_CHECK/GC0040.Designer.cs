@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -114,13 +115,14 @@
             this.dgvIchiran.AllowUserToResizeRows = false;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("MS UI Gothic", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvIchiran.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvIchiran.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvIchiran.ColumnHeadersHeight = 30;
+            this.dgvIchiran.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.dgvIchiran.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.SAGYO_CD,
             this.SAGYO_NAME,
@@ -144,6 +146,14 @@
             this.BIKOU,
             this.BIKOU_OLD,
             this.CHANGE_FLG});
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvIchiran.DefaultCellStyle = dataGridViewCellStyle7;
             this.dgvIchiran.Location = new System.Drawing.Point(26, 104);
             this.dgvIchiran.Name = "dgvIchiran";
             this.dgvIchiran.RowHeadersVisible = false;
@@ -355,23 +365,26 @@
             // 
             this.START_EMPLOYEE_NAME.DataPropertyName = "START_EMPLOYEE_NAME";
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("MS UI Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.START_EMPLOYEE_NAME.DefaultCellStyle = dataGridViewCellStyle3;
             this.START_EMPLOYEE_NAME.HeaderText = "作業開始者";
             this.START_EMPLOYEE_NAME.Name = "START_EMPLOYEE_NAME";
             this.START_EMPLOYEE_NAME.ReadOnly = true;
             this.START_EMPLOYEE_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.START_EMPLOYEE_NAME.Width = 90;
+            this.START_EMPLOYEE_NAME.Width = 95;
             // 
             // SAGYO_START_DATE
             // 
             this.SAGYO_START_DATE.DataPropertyName = "SAGYO_START_DATE";
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.Format = "g";
+            dataGridViewCellStyle4.NullValue = null;
             this.SAGYO_START_DATE.DefaultCellStyle = dataGridViewCellStyle4;
             this.SAGYO_START_DATE.HeaderText = "開始日時";
             this.SAGYO_START_DATE.Name = "SAGYO_START_DATE";
             this.SAGYO_START_DATE.ReadOnly = true;
             this.SAGYO_START_DATE.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.SAGYO_START_DATE.Width = 113;
+            this.SAGYO_START_DATE.Width = 105;
             // 
             // SAGYO_START_DATE_OLD
             // 
@@ -403,18 +416,19 @@
             this.END_EMPLOYEE_NAME.Name = "END_EMPLOYEE_NAME";
             this.END_EMPLOYEE_NAME.ReadOnly = true;
             this.END_EMPLOYEE_NAME.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.END_EMPLOYEE_NAME.Width = 90;
+            this.END_EMPLOYEE_NAME.Width = 95;
             // 
             // SAGYO_END_DATE
             // 
             this.SAGYO_END_DATE.DataPropertyName = "SAGYO_END_DATE";
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.Format = "g";
             this.SAGYO_END_DATE.DefaultCellStyle = dataGridViewCellStyle6;
             this.SAGYO_END_DATE.HeaderText = "終了日時";
             this.SAGYO_END_DATE.Name = "SAGYO_END_DATE";
             this.SAGYO_END_DATE.ReadOnly = true;
             this.SAGYO_END_DATE.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.SAGYO_END_DATE.Width = 113;
+            this.SAGYO_END_DATE.Width = 105;
             // 
             // SAGYO_END_DATE_OLD
             // 
@@ -429,8 +443,8 @@
             this.BIKOU.HeaderText = "備考";
             this.BIKOU.MaxInputLength = 100;
             this.BIKOU.Name = "BIKOU";
-            this.BIKOU.ReadOnly = true;
             this.BIKOU.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.BIKOU.Width = 105;
             // 
             // BIKOU_OLD
             // 
@@ -487,6 +501,9 @@
         private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn1;
         private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn2;
         private System.Windows.Forms.DataGridViewButtonColumn dataGridViewButtonColumn3;
+        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn1;
+        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn2;
+        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_CD;
         private System.Windows.Forms.DataGridViewTextBoxColumn SAGYO_NAME;
         private System.Windows.Forms.DataGridViewCheckBoxColumn PARENT_FLG;
@@ -509,8 +526,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn BIKOU;
         private System.Windows.Forms.DataGridViewTextBoxColumn BIKOU_OLD;
         private System.Windows.Forms.DataGridViewCheckBoxColumn CHANGE_FLG;
-        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn1;
-        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn2;
-        private DataGridViewDisableButtonColumn dataGridViewDisableButtonColumn3;
     }
 }

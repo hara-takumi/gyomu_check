@@ -107,6 +107,7 @@
             this.txtOldPass.Location = new System.Drawing.Point(212, 90);
             this.txtOldPass.MaxLength = 20;
             this.txtOldPass.Name = "txtOldPass";
+            this.txtOldPass.PasswordChar = '●';
             this.txtOldPass.Size = new System.Drawing.Size(225, 22);
             this.txtOldPass.TabIndex = 1;
             this.txtOldPass.WordWrap = false;
@@ -117,6 +118,7 @@
             this.txtNewPass.Location = new System.Drawing.Point(212, 124);
             this.txtNewPass.MaxLength = 20;
             this.txtNewPass.Name = "txtNewPass";
+            this.txtNewPass.PasswordChar = '●';
             this.txtNewPass.Size = new System.Drawing.Size(225, 22);
             this.txtNewPass.TabIndex = 2;
             this.txtNewPass.WordWrap = false;
@@ -127,6 +129,7 @@
             this.txtNewPass2.Location = new System.Drawing.Point(212, 160);
             this.txtNewPass2.MaxLength = 20;
             this.txtNewPass2.Name = "txtNewPass2";
+            this.txtNewPass2.PasswordChar = '●';
             this.txtNewPass2.Size = new System.Drawing.Size(225, 22);
             this.txtNewPass2.TabIndex = 3;
             this.txtNewPass2.WordWrap = false;
