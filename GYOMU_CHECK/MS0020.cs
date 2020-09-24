@@ -1,12 +1,10 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GYOMU_CHECK
@@ -19,8 +17,16 @@ namespace GYOMU_CHECK
         private readonly DateTime dt = DateTime.Now;
         private readonly User user;
         bool changeFlg = false;
-        private readonly string programId = "MS0020";
         private readonly List<Holiday> torokuList = new List<Holiday>();
+        #endregion
+
+        #region 定数
+        const string programId = "MS0020";
+        const string nationalHoliday = "1";
+        const string companyHoliday = "2";
+        const string insertStatus = "0";
+        const string updateStatus = "1";
+        const string deleteStatus = "2";
         #endregion
 
         #region コンストラクタ
@@ -64,7 +70,6 @@ namespace GYOMU_CHECK
                 if (result == DialogResult.Yes)
                 {
                     changeFlg = false;
-                    Close();
                 }
                 else
                 {
@@ -81,7 +86,7 @@ namespace GYOMU_CHECK
         private void dgvCalender1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             string year = cmbYearFrom.Text;
-            string old;
+            string oldDate;
 
             Enumerable.Range(1, 12).ToList()
                 .ForEach(row => 
@@ -91,9 +96,10 @@ namespace GYOMU_CHECK
                     DataGridView dgv = (DataGridView)cs[0];
 
                     string currentDay = dgv[e.ColumnIndex, e.RowIndex - 1].Value.ToString();
-                    string tab = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                    string currentDate = year + tab + String.Format("{0:D2}", Convert.ToInt32(currentDay));
-                    old = currentDate;
+                    string currentMonth = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                    string currentDate = year + currentMonth + String.Format("{0:D2}", Convert.ToInt32(currentDay));
+                    oldDate = currentDate;
+                    //選択セルがnull以外の場合
                     if (dgv[e.ColumnIndex, e.RowIndex].Value != null)
                     {
                         string currentCellName = dgv[e.ColumnIndex, e.RowIndex].Value.ToString();
@@ -103,9 +109,10 @@ namespace GYOMU_CHECK
                             {
                                 foreach (Holiday listHoliday in torokuList)
                                 {
-                                    if (old.Equals(listHoliday.Date))
+                                    //登録されているデータと選択セルのデータが一致する場合
+                                    if (oldDate.Equals(listHoliday.Date))
                                     {
-                                        Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, "1");
+                                        Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, updateStatus);
                                         torokuList.Add(holiday);
                                         break;
                                     }
@@ -113,7 +120,7 @@ namespace GYOMU_CHECK
                             }
                             else
                             {
-                                Holiday holiday = new Holiday(currentCellName, currentDate, "2", "1");
+                                Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, updateStatus);
                                 torokuList.Add(holiday);
                             }
 
@@ -122,15 +129,18 @@ namespace GYOMU_CHECK
                     }
                     else
                     {
+                        //選択セルが編集可能な場合
                         if (dgv[e.ColumnIndex, e.RowIndex].ReadOnly == false)
                         {
+                            //登録件数が1件以上ある場合
                             if (torokuList.Count != 0)
                             {
                                 foreach (Holiday listHoliday in torokuList)
                                 {
-                                    if (old.Equals(listHoliday.Date))
+                                    //登録されているデータと選択セルのデータが一致する場合
+                                    if (oldDate.Equals(listHoliday.Date))
                                     {
-                                        Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, "1");
+                                        Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
                                         torokuList.Add(holiday);
                                     }
                                     break;
@@ -138,14 +148,15 @@ namespace GYOMU_CHECK
                             }
                             else
                             {
+                                //選択セルがnullの場合
                                 if (dgv[e.ColumnIndex, e.RowIndex].Value == null)
                                 {
-                                    Holiday holiday = new Holiday("", currentDate, "2", "1");
+                                    Holiday holiday = new Holiday("", currentDate, companyHoliday, updateStatus);
                                     torokuList.Add(holiday);
                                 }
                                 else
                                 {
-                                    Holiday holiday = new Holiday("", currentDate, "2", "0");
+                                    Holiday holiday = new Holiday("", currentDate, companyHoliday, insertStatus);
                                     torokuList.Add(holiday);
                                 }
                             }
@@ -261,8 +272,11 @@ namespace GYOMU_CHECK
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
-        private void CreateCalendar(int year)
+        private void CreateCalendar()
         {
+            //コンボで選択した年
+            int year = Convert.ToInt32(cmbYearFrom.Text);
+
             Holiday[] dateHoliday = GetHoliday(Convert.ToString(year));
 
             Enumerable.Range(1, 12).ToList()
@@ -273,39 +287,21 @@ namespace GYOMU_CHECK
                     DateTime preYmd = ymd.AddMonths(-1);
 
                     //月の最終日取得(28~31)
-                    int mLength = DateTime.DaysInMonth(ymd.Year, ymd.Month);
-                    int preLength = DateTime.DaysInMonth(preYmd.Year, preYmd.Month);
+                    int finalDay = DateTime.DaysInMonth(ymd.Year, ymd.Month);
+                    int prefinalDay = DateTime.DaysInMonth(preYmd.Year, preYmd.Month);
 
                     DayOfWeek week = ymd.DayOfWeek; //曜日取得
                     int start = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
-                    int cellCount = start; //セル位置
+                    int cellIndex = start; //セル位置
                     int rowCount = 0; //行位置
 
-                    int frstDay = 1;
+                    int frstDay = 1; //日付の最初
 
                     Control[] cs = Controls.Find("dgvCalender" + month.ToString(), true);
 
                     DataGridView dgv = (DataGridView)cs[0];
 
                     dgv.Rows.Clear();
-
-                    dgv.ReadOnly = false;
-
-                    foreach (DataGridViewColumn c in dgv.Columns)
-                    {
-                        c.SortMode = DataGridViewColumnSortMode.NotSortable;
-                    }
-
-                    dgv.AllowUserToAddRows = false;
-                    dgv.AllowUserToDeleteRows = false;
-                    dgv.AllowUserToResizeColumns = false;
-                    dgv.AllowUserToResizeRows = false;
-                    dgv.MultiSelect = false;
-                    dgv.RowHeadersVisible = false;
-                    dgv.SelectionMode = DataGridViewSelectionMode.CellSelect;
-                    dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                    dgv.DefaultCellStyle.Font = new Font("Meiryo UI", 15);
-                    dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
                     //rowとcell作成
                     Enumerable.Range(0, 6).ToList()
@@ -329,19 +325,19 @@ namespace GYOMU_CHECK
                     Enumerable.Range(0, start).ToList()
                     .ForEach(beforeday =>
                     {
-                        dgv.Rows[rowCount].Cells[beforeday].Value = preLength - start + 1;
+                        dgv.Rows[rowCount].Cells[beforeday].Value = prefinalDay - start + 1;
                         dgv.Rows[rowCount].Cells[beforeday].Style.Font = new Font("Meiryo UI", 11);
                         dgv.Rows[rowCount].Cells[beforeday].Style.ForeColor = Color.LightGray;
-                        preLength++;
+                        prefinalDay++;
                     });
 
                     //月初から月末まで
-                    Enumerable.Range(0, mLength).ToList()
+                    Enumerable.Range(0, finalDay).ToList()
                     .ForEach(day =>
                     {
                         if (day + 1 != 1)
                         {
-                            dgv.Rows[rowCount].Cells[cellCount].Value = day + 1;
+                            dgv.Rows[rowCount].Cells[cellIndex].Value = day + 1;
                         }
                         //1日の位置
                         else
@@ -349,54 +345,57 @@ namespace GYOMU_CHECK
                             dgv.Rows[0].Cells[start].Value = day + 1;
                         }
 
-                        ////現在のセルの日付
+                        //現在のセルの日付
                         DateTime tmp = new DateTime(year, month, day + 1);
 
                         //折り返し表示
                         dgv.Rows[rowCount + 1].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
 
-                        ////祝日を編集不可
+                        //祝日を編集不可
                         foreach (Holiday listHoliday in dateHoliday)
                         {
+                            //現在の日付と取得日付が一致する場合
                             if (tmp.ToString() == listHoliday.Date)
                             {
-                                if (listHoliday.kbn.Equals("1"))
+                                //取得日付区分が国民の祝日の場合
+                                if (listHoliday.kbn.Equals(nationalHoliday))
                                 {
-                                    dgv.Rows[rowCount + 1].Cells[cellCount].ReadOnly = true;
+                                    dgv.Rows[rowCount + 1].Cells[cellIndex].ReadOnly = true;
                                 }
                                 else
                                 {
-                                    dgv.Rows[rowCount + 1].Cells[cellCount].ReadOnly = false;
+                                    dgv.Rows[rowCount + 1].Cells[cellIndex].ReadOnly = false;
                                 }
-                                dgv.Rows[rowCount + 1].Cells[cellCount].Value = listHoliday.Name;
-                                dgv.Rows[rowCount].Cells[cellCount].Style.ForeColor = Color.Red;
+                                dgv.Rows[rowCount + 1].Cells[cellIndex].Value = listHoliday.Name;
+                                dgv.Rows[rowCount].Cells[cellIndex].Style.ForeColor = Color.Red;
                             }
                         }
 
-                        switch (cellCount)
+                        switch (cellIndex)
                         {
                             //日曜
                             case 0:
-                                dgv.Rows[rowCount].Cells[cellCount].Style.ForeColor = Color.Red;
+                                dgv.Rows[rowCount].Cells[cellIndex].Style.ForeColor = Color.Red;
                                 //次のcellへ
-                                cellCount++;
+                                cellIndex++;
                                 break;
                             //土曜
                             case 6:
-                                dgv.Rows[rowCount].Cells[cellCount].Style.ForeColor = Color.Blue;
+                                dgv.Rows[rowCount].Cells[cellIndex].Style.ForeColor = Color.Blue;
                                 //土曜の場合、次のrowへ
-                                cellCount = 0;
+                                cellIndex = 0;
                                 rowCount = rowCount + 2;
                                 break;
                             //上記以外
                             default:
                                 //次のcellへ
-                                cellCount++;
+                                cellIndex++;
                                 break;
                         }
                     });
+
                     //次月1日~で埋める
-                    Enumerable.Range(cellCount, 7).Where(nextday => nextday < 7)
+                    Enumerable.Range(cellIndex, 7).Where(nextday => nextday < 7)
                     .ToList()
                     .ForEach(nextday =>
                     {
@@ -599,10 +598,11 @@ namespace GYOMU_CHECK
         {
             List.ForEach(holiday =>
                 {
-                    if (holiday.status == "0")
+                    //登録を行う場合
+                    if (holiday.status == insertStatus)
                     {
-                        string tab = Convert.ToString(Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                        string insertDate = cmbYearFrom.Text + String.Format("{0:D2}", tab) + dt.Day;
+                        string insertMonth = Convert.ToString(Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                        string insertDate = cmbYearFrom.Text + String.Format("{0:D2}", insertMonth) + dt.Day;
                         StringBuilder sql = new StringBuilder();
                         sql.Append(" INSERT INTO MST_HOLIDAY ");
                         sql.Append("    (HOLIDAY_DATE ");
@@ -625,12 +625,14 @@ namespace GYOMU_CHECK
                         sql.Append($"   ,{user.Id} ");
                         sql.Append($"   ,{comU.CAddQuotation(programId)}) ");
 
+                        //祝日の登録に失敗した場合
                         if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
                         {
-                            MessageBox.Show("祝日マスタの登録に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("祝日の登録に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
-                    else if (holiday.status == "1")
+                    //更新を行う場合
+                    else if (holiday.status == updateStatus)
                     {
                         StringBuilder sql = new StringBuilder();
                         sql.Append(" UPDATE MST_HOLIDAY ");
@@ -641,19 +643,23 @@ namespace GYOMU_CHECK
                         sql.Append($"    ,    UPD_PGM = {comU.CAddQuotation(programId)} ");
                         sql.Append($" WHERE HOLIDAY_DATE = {holiday.Date}");
 
+                        //祝日の更新に失敗した場合
                         if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
                         {
-                            MessageBox.Show("祝日マスタの更新に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("祝日の更新に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
-                    else if (holiday.status == "2")
+                    //削除を行う場合
+                    else if (holiday.status == deleteStatus)
                     {
                         StringBuilder sql = new StringBuilder();
                         sql.Append(" DELETE FROM MST_HOLIDAY ");
                         sql.Append($" WHERE HOLIDAY_DATE = '{holiday.Date}'");
+
+                        //祝日の削除に失敗した場合
                         if (!comU.CExecute(ref transaction, ref command, sql.ToString()))
                         {
-                            MessageBox.Show("祝日マスタの削除に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("祝日の削除に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 });
@@ -729,8 +735,8 @@ namespace GYOMU_CHECK
         /// <param name="e"></param>
         private void btnDisplay_Click(object sender, EventArgs e)
         {
-            int year = Convert.ToInt32(cmbYearFrom.Text);
-            CreateCalendar(year);
+            //カレンダー表示
+            CreateCalendar();
         }
 
         /// <summary>
@@ -752,7 +758,7 @@ namespace GYOMU_CHECK
         {
             string year = cmbYearFrom.Text;
             Holiday[] dateHoliday = GetHoliday(year);
-            string old;
+            string oldDate;
 
             Enumerable.Range(1, 12).ToList()
                 .ForEach(month => 
@@ -763,12 +769,14 @@ namespace GYOMU_CHECK
 
                     foreach (DataGridViewCell cell in dgv.SelectedCells)
                     {
+                        //偶数行を選択した場合、編集不可
                         if (cell.RowIndex % 2 != 1)
                         {
                             cell.ReadOnly = true;
                         }
                         else
                         {
+                            //文字列がライトグレイの場合
                             if (dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor == Color.LightGray)
                             {
                                 cell.ReadOnly = true;
@@ -781,15 +789,16 @@ namespace GYOMU_CHECK
                                 changeFlg = true;
 
                                 string currentDay = dgv[cell.ColumnIndex, cell.RowIndex - 1].Value.ToString();
-                                string tab = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                                string currentDate = year + tab + String.Format("{0:D2}", Convert.ToInt32(currentDay));
-                                old = currentDate;
-
+                                string currentMonth = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                                string currentDate = year + currentMonth + String.Format("{0:D2}", Convert.ToInt32(currentDay));
+                                oldDate = currentDate;
+                                //選択したセルがnull以外の場合
                                 if (cell.Value != null)
                                 {
                                     foreach (Holiday listHoliday in dateHoliday)
                                     {
-                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals("1"))
+                                        //データに登録されている国民の祝日と選択した祝日名が一致し、かつ国民の祝日の場合
+                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
                                         {
                                             MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                             break;
@@ -798,26 +807,28 @@ namespace GYOMU_CHECK
                                 }
                                 else
                                 {
+                                    //選択セルが編集できる場合
                                     if (cell.ReadOnly == false)
                                     {
+                                        //登録データが1件以上ある場合
                                         if (torokuList.Count != 0)
                                         {
                                             Holiday holiday;
                                             foreach (Holiday listHoliday in torokuList)
                                             {
-                                                if (old.Equals(listHoliday.Date))
+                                                if (oldDate.Equals(listHoliday.Date))
                                                 {
-                                                    holiday = new Holiday("", currentDate, listHoliday.kbn, "1");
+                                                    holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
                                                     torokuList.Add(holiday);
                                                 }
                                                 break;
                                             }
-                                            holiday = new Holiday("", currentDate, "2", "0");
+                                            holiday = new Holiday("", currentDate, companyHoliday, insertStatus);
                                             torokuList.Add(holiday);
                                         }
                                         else
                                         {
-                                            Holiday holiday = new Holiday("", currentDate, "2", "0");
+                                            Holiday holiday = new Holiday("", currentDate, deleteStatus, insertStatus);
                                             torokuList.Add(holiday);
                                         }
 
@@ -914,12 +925,13 @@ namespace GYOMU_CHECK
         {
             string year = cmbYearFrom.Text;
             Holiday[] dateHoliday = GetHoliday(year);
-            bool flg = true;
+            bool companyflg = true;
 
             Enumerable.Range(1, 12).ToList()
                 .ForEach(month => 
                 {
-                    if (flg)
+                    //国民の祝日の場合通らない
+                    if (companyflg)
                     {
                         Control[] cs = Controls.Find("dgvCalender" + month.ToString(), true);
 
@@ -927,40 +939,47 @@ namespace GYOMU_CHECK
 
                         foreach (DataGridViewCell cell in dgv.SelectedCells)
                         {
+                            //選択セルが奇数行の場合
                             if (cell.RowIndex % 2 == 1)
                             {
                                 string currentCellName = "";
                                 string currentDay = "";
-                                string tab = "";
+                                string currentMonth = "";
                                 string currentDate = "";
 
+                                //選択セルがnull以外の場合
                                 if (cell.Value != null)
                                 {
                                     currentCellName = cell.Value.ToString();
                                     currentDay = dgv[cell.ColumnIndex, cell.RowIndex - 1].Value.ToString();
-                                    tab = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                                    currentDate = year + tab + String.Format("{0:D2}", Convert.ToInt32(currentDay));
+                                    currentMonth = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                                    currentDate = year + currentMonth + String.Format("{0:D2}", Convert.ToInt32(currentDay));
                                     DateTime ymd = new DateTime(Convert.ToInt32(year), month, Convert.ToInt32(currentDay));
                                     int week = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
 
                                     foreach (Holiday listHoliday in dateHoliday)
                                     {
-                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals("1"))
+                                        //データベースの祝日名と選択セルの祝日名が一致、かつ国民の祝日の場合
+                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
                                         {
                                             MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            flg = false;
+                                            companyflg = false;
                                             break;
                                         }
-                                        else if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals("2"))
+                                        //データベースの祝日名と選択セルの祝日名が一致、かつ会社の祝日の場合
+                                        else if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(companyHoliday))
                                         {
-                                            Holiday holiday = new Holiday(currentCellName, currentDate, "2", "2");
+                                            Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, deleteStatus);
                                             torokuList.Add(holiday);
                                             cell.Value = "";
                                             cell.ReadOnly = true;
+                                            //土曜日の場合
                                             if (week == 6)
                                             {
+                                                //日付部の文字色を青色にする
                                                 dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Blue;
                                             }
+                                            //日曜日の場合
                                             else if (week == 0)
                                             {
                                                 //日付部の文字色を赤色にする
@@ -968,6 +987,7 @@ namespace GYOMU_CHECK
                                             }
                                             else
                                             {
+                                                //日付部の文字色を黒色にする
                                                 dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Black;
                                             }
 
@@ -979,26 +999,30 @@ namespace GYOMU_CHECK
                                 else
                                 {
                                     currentDay = dgv[cell.ColumnIndex, cell.RowIndex - 1].Value.ToString();
-                                    tab = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                                    currentDate = year + tab + String.Format("{0:D2}", Convert.ToInt32(currentDay));
+                                    currentMonth = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                                    currentDate = year + currentMonth + String.Format("{0:D2}", Convert.ToInt32(currentDay));
                                     DateTime ymd = new DateTime(Convert.ToInt32(year), month, Convert.ToInt32(currentDay));
-                                    int week = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
+                                    int currentWeek = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
 
-                                    Holiday holiday = new Holiday(currentCellName, currentDate, "2", "2");
+                                    Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, deleteStatus);
                                     torokuList.Add(holiday);
                                     cell.Value = "";
                                     cell.ReadOnly = true;
-                                    if (week == 6)
+                                    //選択した曜日が土曜日の場合
+                                    if (currentWeek == 6)
                                     {
+                                        //日付部の文字色を青色にする
                                         dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Blue;
                                     }
-                                    else if (week == 0)
+                                    //選択した曜日が日曜の場合
+                                    else if (currentWeek == 0)
                                     {
                                         //日付部の文字色を赤色にする
                                         dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Red;
                                     }
                                     else
                                     {
+                                        //日付部の文字色を黒色にする
                                         dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Black;
                                     }
 
@@ -1109,6 +1133,7 @@ namespace GYOMU_CHECK
         /// <param name="e"></param>
         private void btnInsert_Click(object sender, EventArgs e)
         {
+            //登録件数が0件の場合
             if (torokuList.Count == 0)
             {
                 MessageBox.Show("更新対象がありませんでした", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1116,10 +1141,8 @@ namespace GYOMU_CHECK
             else
             {
                 MySqlTransaction transaction = null;
-                if (!comU.CConnect(ref transaction, ref command))
-                {
-                    return;
-                }
+                if (!comU.CConnect(ref transaction, ref command)) return;
+
                 Processing(torokuList, transaction);
                 transaction.Commit();
                 MessageBox.Show("処理が完了しました");
