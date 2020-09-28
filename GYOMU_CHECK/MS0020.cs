@@ -107,23 +107,33 @@ namespace GYOMU_CHECK
                         {
                             if (torokuList.Count != 0)
                             {
-                                foreach (Holiday listHoliday in torokuList)
+                                torokuList.Where(listHoliday => torokuList.Count >= 1).ToList().ForEach(listHoliday =>
                                 {
-                                    //登録されているデータと選択セルのデータが一致する場合
                                     if (oldDate.Equals(listHoliday.Date))
                                     {
-                                        Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, updateStatus);
+                                        Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, "1");
                                         torokuList.Add(holiday);
-                                        break;
                                     }
-                                }
+                                });
+
+
+                                //foreach (Holiday listHoliday in torokuList)
+                                //{
+                                //    //登録されているデータと選択セルのデータが一致する場合
+                                //    if (oldDate.Equals(listHoliday.Date))
+                                //    {
+                                //        Holiday holiday = new Holiday(currentCellName, currentDate, listHoliday.kbn, updateStatus);
+                                //        torokuList.Add(holiday);
+                                //        break;
+                                //    }
+                                //}
                             }
                             else
                             {
                                 Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, updateStatus);
                                 torokuList.Add(holiday);
                             }
-
+                            //torokuList.Add(holiday);
                             changeFlg = true;
                         }
                     }
@@ -135,16 +145,23 @@ namespace GYOMU_CHECK
                             //登録件数が1件以上ある場合
                             if (torokuList.Count != 0)
                             {
-                                foreach (Holiday listHoliday in torokuList)
+                                torokuList.Where(listHoliday => torokuList.Count >= 1).ToList()
+                                .ForEach(listHoliday => 
                                 {
-                                    //登録されているデータと選択セルのデータが一致する場合
-                                    if (oldDate.Equals(listHoliday.Date))
-                                    {
-                                        Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
-                                        torokuList.Add(holiday);
-                                    }
-                                    break;
-                                }
+                                    Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
+                                    torokuList.Add(holiday);
+                                });
+
+                                //foreach (Holiday listHoliday in torokuList)
+                                //{
+                                //    //登録されているデータと選択セルのデータが一致する場合
+                                //    if (oldDate.Equals(listHoliday.Date))
+                                //    {
+                                //        Holiday holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
+                                //        torokuList.Add(holiday);
+                                //    }
+                                //    break;
+                                //}
                             }
                             else
                             {
@@ -352,13 +369,15 @@ namespace GYOMU_CHECK
                         dgv.Rows[rowCount + 1].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
 
                         //祝日を編集不可
-                        foreach (Holiday listHoliday in dateHoliday)
+                        List<Holiday> listHoliday = dateHoliday.AsEnumerable().ToList();
+
+                        listHoliday.ForEach(holiday => 
                         {
                             //現在の日付と取得日付が一致する場合
-                            if (tmp.ToString() == listHoliday.Date)
+                            if (tmp.ToString() == holiday.Date)
                             {
                                 //取得日付区分が国民の祝日の場合
-                                if (listHoliday.kbn.Equals(nationalHoliday))
+                                if (holiday.kbn.Equals(nationalHoliday))
                                 {
                                     dgv.Rows[rowCount + 1].Cells[cellIndex].ReadOnly = true;
                                 }
@@ -366,10 +385,29 @@ namespace GYOMU_CHECK
                                 {
                                     dgv.Rows[rowCount + 1].Cells[cellIndex].ReadOnly = false;
                                 }
-                                dgv.Rows[rowCount + 1].Cells[cellIndex].Value = listHoliday.Name;
+                                dgv.Rows[rowCount + 1].Cells[cellIndex].Value = holiday.Name;
                                 dgv.Rows[rowCount].Cells[cellIndex].Style.ForeColor = Color.Red;
                             }
-                        }
+                        });
+
+                        //foreach (Holiday listHoliday in dateHoliday)
+                        //{
+                        //    //現在の日付と取得日付が一致する場合
+                        //    if (tmp.ToString() == listHoliday.Date)
+                        //    {
+                        //        //取得日付区分が国民の祝日の場合
+                        //        if (listHoliday.kbn.Equals(nationalHoliday))
+                        //        {
+                        //            dgv.Rows[rowCount + 1].Cells[cellIndex].ReadOnly = true;
+                        //        }
+                        //        else
+                        //        {
+                        //            dgv.Rows[rowCount + 1].Cells[cellIndex].ReadOnly = false;
+                        //        }
+                        //        dgv.Rows[rowCount + 1].Cells[cellIndex].Value = listHoliday.Name;
+                        //        dgv.Rows[rowCount].Cells[cellIndex].Style.ForeColor = Color.Red;
+                        //    }
+                        //}
 
                         switch (cellIndex)
                         {
@@ -757,6 +795,7 @@ namespace GYOMU_CHECK
         private void btnSet_Click(object sender, EventArgs e)
         {
             string year = cmbYearFrom.Text;
+            //コンボ選択年の祝日を取得
             Holiday[] dateHoliday = GetHoliday(year);
             string oldDate;
 
@@ -776,8 +815,9 @@ namespace GYOMU_CHECK
                         }
                         else
                         {
-                            //文字列がライトグレイの場合
-                            if (dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor == Color.LightGray)
+                            //日付がライトグレイまたは日付が空白の場合
+                            if (dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor == Color.LightGray
+                            || dgv[cell.ColumnIndex, cell.RowIndex - 1].Value == null)
                             {
                                 cell.ReadOnly = true;
                             }
@@ -795,42 +835,74 @@ namespace GYOMU_CHECK
                                 //選択したセルがnull以外の場合
                                 if (cell.Value != null)
                                 {
-                                    foreach (Holiday listHoliday in dateHoliday)
+                                    List<Holiday> listHoliday = dateHoliday.AsEnumerable().ToList();
+
+                                    bool breakFlg = true;
+                                    listHoliday.ForEach(holiday => 
                                     {
-                                        //データに登録されている国民の祝日と選択した祝日名が一致し、かつ国民の祝日の場合
-                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
+                                        if(breakFlg)
                                         {
-                                            MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            break;
+                                            //データに登録されている国民の祝日と選択した祝日名が一致し、かつ国民の祝日の場合
+                                            if (holiday.Name.Equals(cell.Value) & holiday.kbn.Equals(nationalHoliday))
+                                            {
+                                                MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                cell.ReadOnly = true;
+                                                breakFlg = false;
+                                            }
                                         }
-                                    }
+                                    });
+
+                                    //foreach (Holiday listHoliday in dateHoliday)
+                                    //{
+                                    //    //データに登録されている国民の祝日と選択した祝日名が一致し、かつ国民の祝日の場合
+                                    //    if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
+                                    //    {
+                                    //        MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    //        cell.ReadOnly = true;
+                                    //        break;
+                                    //    }
+                                    //}
                                 }
                                 else
                                 {
                                     //選択セルが編集できる場合
                                     if (cell.ReadOnly == false)
                                     {
+                                        //登録データが0件のある場合
+                                        Holiday holiday = new Holiday("", currentDate, deleteStatus, insertStatus);
+                                        torokuList.Add(holiday);
                                         //登録データが1件以上ある場合
-                                        if (torokuList.Count != 0)
-                                        {
-                                            Holiday holiday;
-                                            foreach (Holiday listHoliday in torokuList)
-                                            {
-                                                if (oldDate.Equals(listHoliday.Date))
-                                                {
-                                                    holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
-                                                    torokuList.Add(holiday);
-                                                }
-                                                break;
-                                            }
-                                            holiday = new Holiday("", currentDate, companyHoliday, insertStatus);
-                                            torokuList.Add(holiday);
-                                        }
-                                        else
-                                        {
-                                            Holiday holiday = new Holiday("", currentDate, deleteStatus, insertStatus);
-                                            torokuList.Add(holiday);
-                                        }
+                                        //if (torokuList.Count != 0)
+                                        //{
+                                        //    Holiday holiday;
+
+                                        //    torokuList.Where(listHoliday => torokuList.Count >= 1).ToList()
+                                        //    .ForEach(listHoliday => 
+                                        //    {
+                                        //        if (oldDate.Equals(listHoliday.Date))
+                                        //        {
+                                        //            holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
+                                        //            torokuList.Add(holiday);
+                                        //        }
+                                        //    });
+
+                                        //    //foreach (Holiday listHoliday in torokuList)
+                                        //    //{
+                                        //    //    if (oldDate.Equals(listHoliday.Date))
+                                        //    //    {
+                                        //    //        holiday = new Holiday("", currentDate, listHoliday.kbn, updateStatus);
+                                        //    //        torokuList.Add(holiday);
+                                        //    //    }
+                                        //    //    break;
+                                        //    //}
+                                        //    holiday = new Holiday("", currentDate, companyHoliday, insertStatus);
+                                        //    torokuList.Add(holiday);
+                                        //}
+                                        //else
+                                        //{
+                                        //    Holiday holiday = new Holiday("", currentDate, deleteStatus, insertStatus);
+                                        //    torokuList.Add(holiday);
+                                        //}
 
                                         changeFlg = true;
                                     }
@@ -957,17 +1029,12 @@ namespace GYOMU_CHECK
                                     DateTime ymd = new DateTime(Convert.ToInt32(year), month, Convert.ToInt32(currentDay));
                                     int week = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
 
-                                    foreach (Holiday listHoliday in dateHoliday)
+                                    dateHoliday.AsEnumerable().Where(listHoliday => dateHoliday.Length >= 1).ToList()
+                                    .ForEach(listHoliday =>
                                     {
-                                        //データベースの祝日名と選択セルの祝日名が一致、かつ国民の祝日の場合
-                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
-                                        {
-                                            MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            companyflg = false;
-                                            break;
-                                        }
+                                        
                                         //データベースの祝日名と選択セルの祝日名が一致、かつ会社の祝日の場合
-                                        else if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(companyHoliday))
+                                        if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(companyHoliday))
                                         {
                                             Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, deleteStatus);
                                             torokuList.Add(holiday);
@@ -992,38 +1059,93 @@ namespace GYOMU_CHECK
                                             }
 
                                             changeFlg = true;
-                                            break;
                                         }
-                                    }
+                                        //データベースの祝日名と選択セルの祝日名が一致、かつ国民の祝日の場合
+                                        else if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
+                                        {
+                                            MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            companyflg = false;
+                                        }
+                                    });
+
+
+                                    //foreach (Holiday listHoliday in dateHoliday)
+                                    //{
+                                    //    //データベースの祝日名と選択セルの祝日名が一致、かつ国民の祝日の場合
+                                    //    if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(nationalHoliday))
+                                    //    {
+                                    //        MessageBox.Show("国民の祝日は変更できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    //        companyflg = false;
+                                    //        break;
+                                    //    }
+                                    //    //データベースの祝日名と選択セルの祝日名が一致、かつ会社の祝日の場合
+                                    //    else if (listHoliday.Name.Equals(cell.Value) & listHoliday.kbn.Equals(companyHoliday))
+                                    //    {
+                                    //        Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, deleteStatus);
+                                    //        torokuList.Add(holiday);
+                                    //        cell.Value = "";
+                                    //        cell.ReadOnly = true;
+                                    //        //土曜日の場合
+                                    //        if (week == 6)
+                                    //        {
+                                    //            //日付部の文字色を青色にする
+                                    //            dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Blue;
+                                    //        }
+                                    //        //日曜日の場合
+                                    //        else if (week == 0)
+                                    //        {
+                                    //            //日付部の文字色を赤色にする
+                                    //            dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Red;
+                                    //        }
+                                    //        else
+                                    //        {
+                                    //            //日付部の文字色を黒色にする
+                                    //            dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Black;
+                                    //        }
+
+                                    //        changeFlg = true;
+                                    //        break;
+                                    //    }
+                                    //}
                                 }
                                 else
                                 {
-                                    currentDay = dgv[cell.ColumnIndex, cell.RowIndex - 1].Value.ToString();
-                                    currentMonth = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
-                                    currentDate = year + currentMonth + String.Format("{0:D2}", Convert.ToInt32(currentDay));
-                                    DateTime ymd = new DateTime(Convert.ToInt32(year), month, Convert.ToInt32(currentDay));
-                                    int currentWeek = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
-
-                                    Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, deleteStatus);
-                                    torokuList.Add(holiday);
-                                    cell.Value = "";
-                                    cell.ReadOnly = true;
-                                    //選択した曜日が土曜日の場合
-                                    if (currentWeek == 6)
+                                    //日付がライトグレイまたは日付が空白の場合
+                                    if (dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor == Color.LightGray
+                                    || dgv[cell.ColumnIndex, cell.RowIndex - 1].Value == null)
                                     {
-                                        //日付部の文字色を青色にする
-                                        dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Blue;
-                                    }
-                                    //選択した曜日が日曜の場合
-                                    else if (currentWeek == 0)
-                                    {
-                                        //日付部の文字色を赤色にする
-                                        dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Red;
+                                        cell.ReadOnly = true;
+                                        break;
                                     }
                                     else
                                     {
-                                        //日付部の文字色を黒色にする
-                                        dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Black;
+                                        currentDay = dgv[cell.ColumnIndex, cell.RowIndex - 1].Value.ToString();
+                                        currentMonth = String.Format("{0:D2}", Convert.ToInt32(tabControl1.SelectedIndex) + 1);
+                                        currentDate = year + currentMonth + String.Format("{0:D2}", Convert.ToInt32(currentDay));
+                                        DateTime ymd = new DateTime(Convert.ToInt32(year), month, Convert.ToInt32(currentDay));
+                                        int currentWeek = (int)ymd.DayOfWeek; //曜日をint型にキャストする。土曜なら「6」、日曜なら「0」
+
+                                        Holiday holiday = new Holiday(currentCellName, currentDate, companyHoliday, deleteStatus);
+                                        torokuList.Add(holiday);
+                                        cell.Value = "";
+                                        cell.ReadOnly = true;
+                                        //選択した曜日が土曜日の場合
+                                        if (currentWeek == 6)
+                                        {
+                                            //日付部の文字色を青色にする
+                                            dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Blue;
+                                        }
+                                        //選択した曜日が日曜の場合
+                                        else if (currentWeek == 0)
+                                        {
+                                            //日付部の文字色を赤色にする
+                                            dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Red;
+                                        }
+                                        else
+                                        {
+                                            //日付部の文字色を黒色にする
+                                            dgv[cell.ColumnIndex, cell.RowIndex - 1].Style.ForeColor = Color.Black;
+                                        }
                                     }
 
                                     changeFlg = true;
